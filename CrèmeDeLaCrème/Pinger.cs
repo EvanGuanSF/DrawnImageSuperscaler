@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using System.Diagnostics;
 using System.Collections.Concurrent;
 
-namespace CrèmeDeLaCrème
+namespace WaifuEmbiggeningAndBatchOptimizationOperations
 {
     static class Pinger
     {

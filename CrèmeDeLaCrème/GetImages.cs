@@ -2,7 +2,7 @@
 using System.IO;
 using System.Linq;
 
-namespace CrèmeDeLaCrème
+namespace WaifuEmbiggeningAndBatchOptimizationOperations
 {
     static class GetImages
     {

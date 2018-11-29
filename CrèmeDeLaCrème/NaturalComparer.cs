@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Globalization;
 
-namespace CrèmeDeLaCrème
+namespace WaifuEmbiggeningAndBatchOptimizationOperations
 {
     public class NaturalComparer
     {

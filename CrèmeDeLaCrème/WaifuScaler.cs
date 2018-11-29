@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Threading.Tasks;
 
-namespace CrèmeDeLaCrème
+namespace WaifuEmbiggeningAndBatchOptimizationOperations
 {
     public static class WaifuScaler
     {
