@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Configuration;
 
 namespace WaifuEmbiggeningAndBatchOptimizationOperations
 {
@@ -39,7 +40,7 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
             newList = arrayOfStuff.OrderBy(x => x, new CustomComparer<string>(NaturalComparer.CompareNatural)).ToList();
 
             // Filter out optimized or unready files.
-            newList.RemoveAll(s => !s.Contains("☆"));
+            newList.RemoveAll(s => !s.Contains(ConfigurationManager.AppSettings["UnprocessedImageFlagChar"]));
 
             return newList;
         }

@@ -72,7 +72,6 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
                     }
                     // Now compress.
                     ImageOptimizer optimizer = new ImageOptimizer();
-
                     optimizer.LosslessCompress((string)imagePath);
                 }
                 GC.Collect();
@@ -120,11 +119,6 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
                 ExceptionOutput.GetExceptionMessages(e);
             }
         }
-        
-        public static Partitioner<T> GetConsumingPartitioner<T>(this BlockingCollection<T> collection)
-        {
-            return new BlockingCollectionPartitioner<T>(collection);
-        }
 
         // Helper funcitons for accessing the Pinger classes' image processing queue/collection.
         #region HelperFunctions
@@ -155,6 +149,11 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
         public static int GetRunningThreadCount()
         {
             return workingThreads;
+        }
+
+        public static Partitioner<T> GetConsumingPartitioner<T>(this BlockingCollection<T> collection)
+        {
+            return new BlockingCollectionPartitioner<T>(collection);
         }
 
         #endregion HelperFunctions

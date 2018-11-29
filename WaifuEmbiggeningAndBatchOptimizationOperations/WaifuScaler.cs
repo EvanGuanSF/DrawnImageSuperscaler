@@ -12,7 +12,7 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
     public static class WaifuScaler
     {
         // Helper enumerator for the ImageOperationType class.
-        public enum ImageResolutionClassification : int { VerySmall, Small,  Normal, Large, VeryLarge };
+        private enum ImageResolutionClassification : int { VerySmall, Small, Normal, Large, VeryLarge };
 
         /// <summary>
         /// This class hold the name of the image and whether or not it
@@ -40,14 +40,14 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
         public static void UpYourWaifu(string directory)
         {
             string currentDirectory = Directory.GetCurrentDirectory();
-            string stageOneNormalInputPath = currentDirectory + ConfigurationManager.AppSettings["SourceFolderName"];
-            string stageOneOutputPath = currentDirectory + ConfigurationManager.AppSettings["TempFolderName"];
+            string stageOneNormalInputPath = Path.Combine(currentDirectory, ConfigurationManager.AppSettings["SourceFolderName"]);
+            string stageOneOutputPath = Path.Combine(currentDirectory, ConfigurationManager.AppSettings["TempFolderName"].ToString());
             string processedImagePath = null;
 
             int totalImages = 0;
 
             CancellationTokenSource pingerCancelToken = new CancellationTokenSource();
-            
+
             // Make the temp folder.
             MakeDirectory(stageOneOutputPath);
 
@@ -56,8 +56,6 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
             List<string> imagePaths = GetImages.GetAllImages(stageOneNormalInputPath);
             List<ImageOperationType> imageOpList = new List<ImageOperationType>();
             int maxLength = 0;
-
-
 
             foreach (string image in imagePaths)
             {
@@ -84,7 +82,7 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
                                 // At least 5000x4500
                                 imageOpList.Add(new ImageOperationType(image, ImageResolutionClassification.Large));
                             }
-                            else if((sourceImage.Width * sourceImage.Height) >= 786432)
+                            else if ((sourceImage.Width * sourceImage.Height) >= 786432)
                             {
                                 // At least 1024x768
                                 imageOpList.Add(new ImageOperationType(image, ImageResolutionClassification.Normal));
@@ -130,7 +128,7 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
             int dotIncrementer = 0;
             foreach (ImageOperationType image in imageOpList)
             {
-                if(userRequestCancelRemainingOperations)
+                if (userRequestCancelRemainingOperations)
                 {
                     break;
                 }
@@ -140,7 +138,7 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
 
                 while (!anJob.IsCompleted)
                 {
-                    if(!userRequestCancelRemainingOperations)
+                    if (!userRequestCancelRemainingOperations)
                     {
                         Console.Write(("\rUpscaling" + new string('.', (dotIncrementer % 10) + 1) +
                             new string(' ', 9 - (dotIncrementer % 10))).PadRight(46) +
@@ -168,7 +166,7 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
                 {
                     File.Delete(stageOneOutputPath + "\\" + Path.GetFileName(image.ImagePath));
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
                     ExceptionOutput.GetExceptionMessages(e);
                 }
@@ -177,7 +175,7 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
                 // Now enqueue an optimization task.
                 Pinger.EnqueueImageForOptimization(processedImagePath);
             }
-            if(imagesScaled == totalImages)
+            if (imagesScaled == totalImages)
             {
                 Console.Write("\rFiles converted".PadRight(46) + ": (" + imagesScaled + "/" + totalImages + ") (done)" +
                         new string(' ', maxLength + 40) +
@@ -247,44 +245,44 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
         private static void Waifu2xJobController(ImageOperationType image)
         {
             string currentDirectory = Directory.GetCurrentDirectory();
-            string stageOneNormalInputPath = currentDirectory + ConfigurationManager.AppSettings["SourceFolderName"];
-            string stageOneOutputPath = currentDirectory + ConfigurationManager.AppSettings["TempFolderName"];
+            string stageOneNormalInputPath = Path.Combine(currentDirectory, ConfigurationManager.AppSettings["SourceFolderName"]);
+            string stageOneOutputPath = Path.Combine(currentDirectory, ConfigurationManager.AppSettings["TempFolderName"]);
             string latterStageImage = null;
             string fileName = Path.GetFileName(image.ImagePath);
 
             // Sequential scale and quality operations depending on flag.
-            switch(image.opType)
+            switch (image.opType)
             {
                 case ImageResolutionClassification.VeryLarge:
                     {
                         // VeryLarge case. Quality pass before doing a 2x scale with reduced batch size.
-                        DoUpTheWaifusDirect(image.ImagePath, stageOneOutputPath + "\\" + fileName, 1, 2, 256);
-                        latterStageImage = stageOneOutputPath + "\\" + fileName;
-                        DoUpTheWaifusDirect(latterStageImage, currentDirectory + "\\" + fileName, 2, 2, 256);
+                        DoUpTheWaifusDirect(image.ImagePath, Path.Combine(stageOneOutputPath, fileName), 1, 2, 256);
+                        latterStageImage = Path.Combine(stageOneOutputPath, fileName);
+                        DoUpTheWaifusDirect(latterStageImage, Path.Combine(currentDirectory, fileName), 2, 2, 256);
                         break;
                     }
                 case ImageResolutionClassification.Large:
                     {
                         // Large case. Quality pass before doing a 2x scale.
-                        DoUpTheWaifusDirect(image.ImagePath, stageOneOutputPath + "\\" + fileName, 1, 4, 256);
-                        latterStageImage = stageOneOutputPath + "\\" + fileName;
-                        DoUpTheWaifusDirect(latterStageImage, currentDirectory + "\\" + fileName, 2, 4, 256);
+                        DoUpTheWaifusDirect(image.ImagePath, Path.Combine(stageOneOutputPath, fileName), 1, 4, 256);
+                        latterStageImage = Path.Combine(stageOneOutputPath, fileName);
+                        DoUpTheWaifusDirect(latterStageImage, Path.Combine(currentDirectory, fileName), 2, 4, 256);
                         break;
                     }
                 case ImageResolutionClassification.Normal:
                     {
                         // Normal case. 2x scale before doing a quality pass.
-                        DoUpTheWaifusDirect(image.ImagePath, stageOneOutputPath + "\\" + fileName, 2, 4, 256);
-                        latterStageImage = stageOneOutputPath + "\\" + fileName;
-                        DoUpTheWaifusDirect(latterStageImage, currentDirectory + "\\" + fileName, 1, 4, 256);
+                        DoUpTheWaifusDirect(image.ImagePath, Path.Combine(stageOneOutputPath, fileName), 2, 4, 256);
+                        latterStageImage = Path.Combine(stageOneOutputPath, fileName);
+                        DoUpTheWaifusDirect(latterStageImage, Path.Combine(currentDirectory, fileName), 1, 4, 256);
                         break;
                     }
                 case ImageResolutionClassification.Small:
                     {
                         // Small case. Quality pass before doing a 2x scale with modified .
-                        DoUpTheWaifusDirect(image.ImagePath, stageOneOutputPath + "\\" + fileName, 1, 6, 128);
-                        latterStageImage = stageOneOutputPath + "\\" + fileName;
-                        DoUpTheWaifusDirect(latterStageImage, currentDirectory + "\\" + fileName, 2, 6, 128);
+                        DoUpTheWaifusDirect(image.ImagePath, Path.Combine(stageOneOutputPath, fileName), 1, 6, 256);
+                        latterStageImage = Path.Combine(stageOneOutputPath, fileName);
+                        DoUpTheWaifusDirect(latterStageImage, Path.Combine(currentDirectory, fileName), 2, 6, 256);
                         break;
                     }
                 case ImageResolutionClassification.VerySmall:
@@ -293,9 +291,9 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
                         break;
                     }
                 default:
-                {
-                    break;
-                }
+                    {
+                        break;
+                    }
             }
         }
 
@@ -326,7 +324,7 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
         private static void CleanupFolders()
         {
             // Cleanup folders.
-            string stageOneOutputPath = Directory.GetCurrentDirectory() + ConfigurationManager.AppSettings["TempFolderName"];
+            string stageOneOutputPath = Path.Combine(Directory.GetCurrentDirectory(), ConfigurationManager.AppSettings["TempFolderName"]);
             try
             {
                 Directory.Delete(stageOneOutputPath, true);
@@ -350,14 +348,14 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
         private static int DoUpTheWaifusDirect(string inputFile, string outputPath,
             int imageScale = 2, int batch = 6, int split = 128, string modelDir = "")
         {
-            if(modelDir.Length == 0)
+            if (modelDir.Length == 0)
             {
-                modelDir = ConfigurationManager.AppSettings["Waifu2xCaffeDirectory"] + ConfigurationManager.AppSettings["ModelDirectory"];
+                modelDir = Path.Combine(ConfigurationManager.AppSettings["Waifu2xCaffeDirectory"], ConfigurationManager.AppSettings["ModelDirectory"]);
             }
             string workingDirectory = Directory.GetCurrentDirectory();
-            string waifuExec = ConfigurationManager.AppSettings["Waifu2xCaffeDirectory"] + @"waifu2x-caffe-cui.exe";
+            string waifuExec = Path.Combine(ConfigurationManager.AppSettings["Waifu2xCaffeDirectory"], @"waifu2x-caffe-cui.exe");
 
-            if(!File.Exists(waifuExec))
+            if (!File.Exists(waifuExec))
             {
                 Console.WriteLine("No Waifu2x - Caffe executable found! Enter a key to exit.");
                 Console.ReadKey();
@@ -397,15 +395,15 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
                 exitCode = magDenoise.ExitCode;
 
                 // Check the exit code.
-                if(exitCode < 0)
+                if (exitCode < 0)
                 {
-                    if(batch > 1)
+                    if (batch > 1)
                     {
                         // Try reducing the batch size first.
                         Console.WriteLine("\nERROR - Could not convert. Changing batch size from " + batch + " to " + (batch - 1));
                         batch--;
                     }
-                    else if( split > 1)
+                    else if (split > 1)
                     {
                         // If we still can't convert, try lowering the split size.
                         Console.WriteLine("\nERROR - Could not convert. Changing split size from " + split + " to " + (split / 2));
