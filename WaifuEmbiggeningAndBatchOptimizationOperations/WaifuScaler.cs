@@ -209,7 +209,8 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
                 Console.Write(("\rOptimizer pass in progress" +
                     new string('.', (dotIncrementer % 10) + 1) +
                     new string(' ', 9 - (dotIncrementer % 10))).PadRight(46) +
-                    ": (" + (totalImages - Pinger.GetConcurrentImageQueueCount() - Pinger.GetRunningThreadCount()) + "/" + totalImages + ") images optimized");
+                    ": (" + (totalImages - Pinger.GetConcurrentImageQueueCount() - Pinger.GetRunningThreadCount()) +
+                    "/" + totalImages + ") images optimized");
                 dotIncrementer++;
                 Thread.Sleep(100);
             }
@@ -341,19 +342,20 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
         /// </summary>
         /// <param name="inputFile"></param>
         /// <param name="outputPath"></param>
-        /// <param name="imageScale"></param>
+        /// <param name="magnificationSize"></param>
         /// <param name="batch"></param>
         /// <param name="split"></param>
         /// <returns>Exit code of Waifu2x - Caffe</returns>
         private static int DoUpTheWaifusDirect(string inputFile, string outputPath,
-            int imageScale = 2, int batch = 6, int split = 128, string modelDir = "")
+            int magnificationSize = 2, int batch = 6, int split = 128)
         {
-            if (modelDir.Length == 0)
-            {
-                modelDir = Path.Combine(ConfigurationManager.AppSettings["Waifu2xCaffeDirectory"], ConfigurationManager.AppSettings["ModelDirectory"]);
-            }
+            string modelDir = Path.Combine(ConfigurationManager.AppSettings["Waifu2xCaffeDirectory"],
+                    ConfigurationManager.AppSettings["ModelDirectory"]);
+            //Console.WriteLine(modelDir);
+
             string workingDirectory = Directory.GetCurrentDirectory();
-            string waifuExec = Path.Combine(ConfigurationManager.AppSettings["Waifu2xCaffeDirectory"], @"waifu2x-caffe-cui.exe");
+            string waifuExec = Path.Combine(ConfigurationManager.AppSettings["Waifu2xCaffeDirectory"],
+                Path.Combine(ConfigurationManager.AppSettings["Waifu2xExecutableName"]));
 
             if (!File.Exists(waifuExec))
             {
@@ -365,7 +367,7 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
             if (!File.Exists(inputFile))
             {
                 // Empty directory. Just return.
-                Console.WriteLine("\nERROR - No such file".PadRight(46) + ": " + Path.GetFileName(inputFile));
+                Console.WriteLine("\nERROR - No such file".PadRight(46) + ": " + inputFile);
                 return -1;
             }
 
@@ -373,7 +375,6 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
             int exitCode = -1;
             do
             {
-
                 // Initialize Waifu2x-Caffe information for 2x scale denoise+magnify 3.
                 ProcessStartInfo magDenoiseInfo = new ProcessStartInfo
                 {
@@ -381,12 +382,19 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
                     WindowStyle = ProcessWindowStyle.Hidden,
 
                     // Setup arguments.
-                    Arguments = "--gpu 0 -b " + batch + " -c " + split + " -d 8 -p cudnn" +
-                       " --model_dir \"" + modelDir + "\"" +
-                       " -s " + imageScale + " -n 3 -m noise_scale -e .png" +
-                       " -l png" +
-                       " -o \"" + outputPath + "\"" +
-                       " -i \"" + inputFile + "\""
+                    Arguments = "--gpu 0" +
+                        " -b " + batch +
+                        " -c " + split +
+                        " -d 8" +
+                        " -p cudnn" +
+                        " --model_dir \"" + modelDir + "\"" +
+                        " -s " + magnificationSize +
+                        " -n " + ConfigurationManager.AppSettings["DenoiseLevel"] +
+                        " -m " + ConfigurationManager.AppSettings["ConversionMode"] +
+                        " -e .png" +
+                        " -l png" +
+                        " -o \"" + outputPath + "\"" +
+                        " -i \"" + inputFile + "\""
                 };
                 // Start Waifu2x-Caffe and wait for it to exit.
                 Process magDenoise = Process.Start(magDenoiseInfo);
@@ -400,18 +408,18 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
                     if (batch > 1)
                     {
                         // Try reducing the batch size first.
-                        Console.WriteLine("\nERROR - Could not convert. Changing batch size from " + batch + " to " + (batch - 1));
+                        Console.WriteLine("\rERROR - Could not convert. Changing batch size from " + batch + " to " + (batch - 1));
                         batch--;
                     }
                     else if (split > 1)
                     {
                         // If we still can't convert, try lowering the split size.
-                        Console.WriteLine("\nERROR - Could not convert. Changing split size from " + split + " to " + (split / 2));
+                        Console.WriteLine("\rERROR - Could not convert. Changing split size from " + split + " to " + (split / 2));
                         split /= 2;
                     }
                     else
                     {
-                        Console.WriteLine("\nERROR - Could not convert".PadRight(46) + ": " + Path.GetFileName(inputFile));
+                        Console.WriteLine("\rERROR - Could not convert".PadRight(46) + ": " + Path.GetFileName(inputFile));
                         Console.WriteLine("Last exit code".PadRight(46) + ": " + exitCode);
                         Console.ReadLine();
                         Environment.Exit(-1);
