@@ -281,9 +281,9 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
                 case ImageResolutionClassification.Small:
                     {
                         // Small case. Quality pass before doing a 2x scale with modified .
-                        DoUpTheWaifusDirect(image.ImagePath, Path.Combine(stageOneOutputPath, fileName), 1, 6, 256);
+                        DoUpTheWaifusDirect(image.ImagePath, Path.Combine(stageOneOutputPath, fileName), 1, 6, 128);
                         latterStageImage = Path.Combine(stageOneOutputPath, fileName);
-                        DoUpTheWaifusDirect(latterStageImage, Path.Combine(currentDirectory, fileName), 2, 6, 256);
+                        DoUpTheWaifusDirect(latterStageImage, Path.Combine(currentDirectory, fileName), 2, 6, 128);
                         break;
                     }
                 case ImageResolutionClassification.VerySmall:
@@ -408,13 +408,19 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
                     if (batch > 1)
                     {
                         // Try reducing the batch size first.
-                        Console.WriteLine("\rERROR - Could not convert. Changing batch size from " + batch + " to " + (batch - 1));
+                        Console.WriteLine("\rERROR - Could not convert. Changing batch size from " + batch + " to " + (batch - 1) +
+                            " for : " + Path.GetFileName(inputFile) +
+                            new string(' ', inputFile.Length) +
+                            new string('\b', inputFile.Length + 1));
                         batch--;
                     }
                     else if (split > 1)
                     {
                         // If we still can't convert, try lowering the split size.
-                        Console.WriteLine("\rERROR - Could not convert. Changing split size from " + split + " to " + (split / 2));
+                        Console.WriteLine("\rERROR - Could not convert. Changing split size from " + split + " to " + (split / 2) +
+                            " for : " + Path.GetFileName(inputFile) +
+                            new string(' ', inputFile.Length) +
+                            new string('\b', inputFile.Length + 1));
                         split /= 2;
                     }
                     else
