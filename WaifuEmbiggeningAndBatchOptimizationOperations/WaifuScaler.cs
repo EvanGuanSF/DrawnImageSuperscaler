@@ -164,14 +164,14 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
                 imagesScaled++;
                 try
                 {
-                    File.Delete(stageOneOutputPath + "\\" + Path.GetFileName(image.ImagePath));
+                    File.Delete(Path.Combine(stageOneOutputPath, Path.GetFileName(image.ImagePath)));
                 }
                 catch (Exception e)
                 {
                     ExceptionOutput.GetExceptionMessages(e);
                 }
 
-                processedImagePath = currentDirectory + "\\" + Path.GetFileName(image.ImagePath);
+                processedImagePath = Path.Combine(currentDirectory, Path.GetFileName(image.ImagePath));
                 // Now enqueue an optimization task.
                 Pinger.EnqueueImageForOptimization(processedImagePath);
             }
