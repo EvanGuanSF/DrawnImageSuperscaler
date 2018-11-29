@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Text;
-using System.Threading;
+using System.Configuration;
 using System.Threading.Tasks;
 
 namespace WaifuEmbiggeningAndBatchOptimizationOperations
@@ -13,6 +13,8 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
     {
         static void Main(string[] args)
         {
+            ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+
             Console.SetWindowSize(150, 40);
             Console.SetWindowPosition(0, 0);
 
@@ -21,7 +23,8 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
 
             DateTime startTime = DateTime.Now;
 
-            Console.WriteLine("Crème De La Crème started at".PadRight(45) + ": " + DateTime.Now.ToString("hh:mm:ss tt"));
+            Console.WriteLine("WEaBOO started at".PadRight(45) + ": " + DateTime.Now.ToString("hh:mm:ss tt"));
+            Console.WriteLine(Environment.CurrentDirectory);
             Console.WriteLine();
 
             // Start a timer.
@@ -32,7 +35,7 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
             DateTime endTime = DateTime.Now;
             
             Console.WriteLine();
-            Console.WriteLine("Crème De La Crème finished at".PadRight(45) + ": " + DateTime.Now.ToString("hh:mm:ss tt"));
+            Console.WriteLine("WEaBOO finished at".PadRight(45) + ": " + DateTime.Now.ToString("hh:mm:ss tt"));
             Console.WriteLine("Image operations completed in".PadRight(45) + ": " + ReadableTime(TimeSpan.FromMilliseconds(watch.ElapsedMilliseconds)));
             Console.WriteLine("All done.");
             Console.ReadLine();

@@ -4,7 +4,7 @@ using System.IO;
 using ImageMagick;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Diagnostics;
+using System.Configuration;
 using System.Collections.Concurrent;
 
 namespace WaifuEmbiggeningAndBatchOptimizationOperations
@@ -23,7 +23,8 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
         public static void ConvertIndividualToPNGAsync(CancellationToken cancellationToken)
         {
             // This loop continually checks the BlockingCollection for new images to be processed.
-            Parallel.ForEach(concurrentImageCollection.GetConsumingPartitioner(), new ParallelOptions { MaxDegreeOfParallelism = (int)(Environment.ProcessorCount * .75) },
+            Parallel.ForEach(concurrentImageCollection.GetConsumingPartitioner(),
+                new ParallelOptions { MaxDegreeOfParallelism = (int)(Environment.ProcessorCount * .75) },
                 (curImage, loopState) =>
                 {
                     // Optimize the image.
@@ -97,7 +98,8 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
                 * ★
                 * 
                 */
-            newName = image.Replace('☆', '✨');
+            newName = image.Replace(char.Parse(ConfigurationManager.AppSettings["UnprocessedImageFlagChar"]),
+                char.Parse(ConfigurationManager.AppSettings["ProcessedImageFlagChar"]));
 
             // Rename the file.
             // If a file with the new name already exists, delete then rename.

@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Threading.Tasks;
+using System.Configuration;
 
 namespace WaifuEmbiggeningAndBatchOptimizationOperations
 {
@@ -39,8 +40,8 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
         public static void UpYourWaifu(string directory)
         {
             string currentDirectory = Directory.GetCurrentDirectory();
-            string stageOneNormalInputPath = currentDirectory + @"\S&R";
-            string stageOneOutputPath = currentDirectory + @"\.temp";
+            string stageOneNormalInputPath = currentDirectory + ConfigurationManager.AppSettings["SourceFolderName"];
+            string stageOneOutputPath = currentDirectory + ConfigurationManager.AppSettings["TempFolderName"];
             string processedImagePath = null;
 
             int totalImages = 0;
@@ -50,10 +51,13 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
             // Make the temp folder.
             MakeDirectory(stageOneOutputPath);
 
-            // Sort out the special cases (Images with more than 22,500,000 pixels).
+            // Get the images in the S&R folder and put their paths in a list
+            // in natural order (Windows sort by name ascending).
             List<string> imagePaths = GetImages.GetAllImages(stageOneNormalInputPath);
             List<ImageOperationType> imageOpList = new List<ImageOperationType>();
             int maxLength = 0;
+
+
 
             foreach (string image in imagePaths)
             {
@@ -243,8 +247,8 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
         private static void Waifu2xJobController(ImageOperationType image)
         {
             string currentDirectory = Directory.GetCurrentDirectory();
-            string stageOneNormalInputPath = currentDirectory + @"\S&R";
-            string stageOneOutputPath = currentDirectory + @"\.temp";
+            string stageOneNormalInputPath = currentDirectory + ConfigurationManager.AppSettings["SourceFolderName"];
+            string stageOneOutputPath = currentDirectory + ConfigurationManager.AppSettings["TempFolderName"];
             string latterStageImage = null;
             string fileName = Path.GetFileName(image.ImagePath);
 
@@ -322,7 +326,7 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
         private static void CleanupFolders()
         {
             // Cleanup folders.
-            string stageOneOutputPath = Directory.GetCurrentDirectory() + @"\.temp";
+            string stageOneOutputPath = Directory.GetCurrentDirectory() + ConfigurationManager.AppSettings["TempFolderName"];
             try
             {
                 Directory.Delete(stageOneOutputPath, true);
@@ -344,10 +348,21 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
         /// <param name="split"></param>
         /// <returns>Exit code of Waifu2x - Caffe</returns>
         private static int DoUpTheWaifusDirect(string inputFile, string outputPath,
-            int imageScale = 2, int batch = 6, int split = 128, string modelDir = @"E:\Tools\Waifu2x - Caffe\models\cunet")
+            int imageScale = 2, int batch = 6, int split = 128, string modelDir = "")
         {
+            if(modelDir.Length == 0)
+            {
+                modelDir = ConfigurationManager.AppSettings["Waifu2xCaffeDirectory"] + ConfigurationManager.AppSettings["ModelDirectory"];
+            }
             string workingDirectory = Directory.GetCurrentDirectory();
-            string waifuExec = @"E:\Tools\Waifu2x - Caffe\waifu2x-caffe-cui.exe";
+            string waifuExec = ConfigurationManager.AppSettings["Waifu2xCaffeDirectory"] + @"waifu2x-caffe-cui.exe";
+
+            if(!File.Exists(waifuExec))
+            {
+                Console.WriteLine("No Waifu2x - Caffe executable found! Enter a key to exit.");
+                Console.ReadKey();
+                Environment.Exit(-1);
+            }
 
             if (!File.Exists(inputFile))
             {
