@@ -31,6 +31,11 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
             }
         }
 
+        /// <summary>
+        /// This is the primary working function of the WaifuScaler class.
+        /// It sets up, directs, and monitors the core workflow of the program.
+        /// </summary>
+        /// <param name="directory"></param>
         public static void UpYourWaifu(string directory)
         {
             string currentDirectory = Directory.GetCurrentDirectory();
@@ -48,7 +53,7 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
             // in natural order (Windows sort by name ascending).
             List<ImageOperationInfo> imageOpList = SortImageListByResolution(GetImages.GetAllImages(stageOneNormalInputPath));
             int maxLength = 0;
-            int totalProcessableImages = imageOpList.Count;
+            int numTotalProcessableImages = imageOpList.Count;
             
             // Get the length of the longest filename in the list.
             foreach (ImageOperationInfo image in imageOpList)
@@ -81,9 +86,10 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
             });
 
             // Tell the user that the scaling operations are in progress.
-            int imagesScaled = 0;
+            int numProcessedImages = 0;
 
             // Waifu2x - Caffee conversion loop.
+            Console.Title = "(" + numProcessedImages + "/" + numTotalProcessableImages + ") Images Scaled";
             int dotIncrementer = 0;
             foreach (ImageOperationInfo image in imageOpList)
             {
@@ -101,7 +107,7 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
                     {
                         Console.Write(("\rUpscaling" + new string('.', (dotIncrementer % 10) + 1) +
                             new string(' ', 9 - (dotIncrementer % 10))).PadRight(46) +
-                            ": (" + imagesScaled + "/" + totalProcessableImages + ") " +
+                            ": (" + numProcessedImages + "/" + numTotalProcessableImages + ") " +
                             "Now processing: " + currentImageName +
                             new string(' ', maxLength + 10) + new string('\b', maxLength + 11));
                         dotIncrementer++;
@@ -110,7 +116,7 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
                     {
                         Console.Write(("\rFinishing current jobs" + new string('.', (dotIncrementer % 10) + 1) +
                             new string(' ', 9 - (dotIncrementer % 10))).PadRight(46) +
-                            ": (" + imagesScaled + "/" + totalProcessableImages + ") " +
+                            ": (" + numProcessedImages + "/" + numTotalProcessableImages + ") " +
                             "Now processing: " + currentImageName +
                             new string(' ', maxLength + 10) + new string('\b', maxLength + 11));
                         dotIncrementer++;
@@ -120,7 +126,7 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
                 }
                 anJob.Wait();
 
-                imagesScaled++;
+                numProcessedImages++;
                 try
                 {
                     File.Delete(Path.Combine(stageOneOutputPath, Path.GetFileName(image.ImagePath)));
@@ -133,17 +139,19 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
                 processedImagePath = Path.Combine(currentDirectory, Path.GetFileName(image.ImagePath));
                 // Now enqueue an optimization task.
                 Pinger.EnqueueImageForOptimization(processedImagePath);
+
+                Console.Title = "(" + numProcessedImages + "/" + numTotalProcessableImages + ") Images Scaled";
             }
-            if (imagesScaled == totalProcessableImages)
+            if (numProcessedImages == numTotalProcessableImages)
             {
-                Console.Write("\rFiles converted".PadRight(46) + ": (" + imagesScaled + "/" + totalProcessableImages + ") (done)" +
+                Console.Write("\rFiles converted".PadRight(46) + ": (" + numProcessedImages + "/" + numTotalProcessableImages + ") Completed Normally" +
                         new string(' ', maxLength + 40) +
                         new string('\b', maxLength + 41));
                 Console.WriteLine();
             }
             else
             {
-                Console.Write("\rFiles converted".PadRight(46) + ": (" + imagesScaled + "/" + totalProcessableImages + ")" +
+                Console.Write("\rFiles converted".PadRight(46) + ": (" + numProcessedImages + "/" + numTotalProcessableImages + ")" +
                         new string(' ', maxLength + 40) +
                         new string('\b', maxLength + 41));
                 Console.WriteLine();
@@ -168,9 +176,11 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
                 Console.Write(("\rOptimizer pass in progress" +
                     new string('.', (dotIncrementer % 10) + 1) +
                     new string(' ', 9 - (dotIncrementer % 10))).PadRight(46) +
-                    ": (" + (totalProcessableImages - Pinger.GetConcurrentImageQueueCount() - Pinger.GetRunningThreadCount()) +
-                    "/" + totalProcessableImages + ") images optimized");
+                    ": (" + (numTotalProcessableImages - Pinger.GetConcurrentImageQueueCount() - Pinger.GetRunningThreadCount()) +
+                    "/" + numTotalProcessableImages + ") Images Optimized");
                 dotIncrementer++;
+                Console.Title = "(" + (numTotalProcessableImages - Pinger.GetConcurrentImageQueueCount() - Pinger.GetRunningThreadCount()) +
+                    "/" + numTotalProcessableImages + ") Images Optimized";
                 Thread.Sleep(100);
             }
             if (userRequestCancelRemainingOperations && (!optimizationBackgroundTask.IsCanceled || !optimizationBackgroundTask.IsCompleted))
@@ -189,14 +199,18 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
             {
                 Console.Write("\rOptimizer pass cancelled." + new string(' ', 55) + new string('\b', 56));
                 Console.WriteLine();
+                Console.Title = "(" + (numTotalProcessableImages - Pinger.GetConcurrentImageQueueCount() - Pinger.GetRunningThreadCount()) +
+                    "/" + numTotalProcessableImages + ") (User Cancelled)";
                 return;
             }
             else
             {
                 Console.Write("\rOptimizer pass completed".PadRight(46) +
-                    ": (" + (totalProcessableImages - Pinger.GetConcurrentImageQueueCount()) + "/" + totalProcessableImages + ") images optimized" +
+                    ": (" + (numTotalProcessableImages - Pinger.GetConcurrentImageQueueCount()) + "/" + numTotalProcessableImages + ") Images Optimized" +
                     new string(' ', 55) + new string('\b', 56));
                 Console.WriteLine();
+                Console.Title = "(" + (numTotalProcessableImages - Pinger.GetConcurrentImageQueueCount() - Pinger.GetRunningThreadCount()) +
+                    "/" + numTotalProcessableImages + ") (Completed Normally)";
             }
             optimizationsCompleted = true;
             CleanupFolders();
@@ -212,38 +226,35 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
             // Get the images in the S&R folder and put their paths in a list
             // in natural order (Windows sort by name ascending).
             List<ImageOperationInfo> imageOpList = new List<ImageOperationInfo>();
-            int maxLength = 0;
 
             foreach (string image in imagePaths)
             {
+                Console.WriteLine(image);
                 try
                 {
-                    int test = Path.GetFileName(image).Length;
-                    if (test > maxLength)
-                        maxLength = test;
-
                     using (Stream stream = File.OpenRead(image))
                     {
                         using (Image sourceImage = Image.FromStream(stream, false, false))
                         {
                             // Set the operation type for the image to be processed based on the
                             // dimensions of the image.
-                            if ((sourceImage.Width * sourceImage.Height) >= 100000000)
+                            int resolution = (sourceImage.Width * sourceImage.Height);
+                            if (resolution >= 100000000)
                             {
                                 // At least 10000x10000
                                 imageOpList.Add(new ImageOperationInfo(image, ImageResolutionClassification.VeryLarge));
                             }
-                            else if ((sourceImage.Width * sourceImage.Height) >= 22500000)
+                            else if (resolution >= 22500000)
                             {
                                 // At least 5000x4500
                                 imageOpList.Add(new ImageOperationInfo(image, ImageResolutionClassification.Large));
                             }
-                            else if ((sourceImage.Width * sourceImage.Height) >= 786432)
+                            else if (resolution >= 786432)
                             {
                                 // At least 1024x768
                                 imageOpList.Add(new ImageOperationInfo(image, ImageResolutionClassification.Normal));
                             }
-                            else if ((sourceImage.Width * sourceImage.Height) >= 172800)
+                            else if (resolution >= 172800)
                             {
                                 // At least 480x360
                                 imageOpList.Add(new ImageOperationInfo(image, ImageResolutionClassification.Small));

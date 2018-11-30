@@ -21,7 +21,7 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
             }
 
             var listOfStuff = Directory.EnumerateFiles(directory, "*.*", SearchOption.TopDirectoryOnly)
-            .Where(s => s.EndsWith(".png"));
+            .Where(s => s.EndsWith(".png") || s.EndsWith(".jpg") || s.EndsWith(".bmp"));
 
 
             int count = listOfStuff.Count();

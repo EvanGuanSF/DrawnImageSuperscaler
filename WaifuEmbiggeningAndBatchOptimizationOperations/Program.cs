@@ -12,7 +12,8 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
     {
         static void Main(string[] args)
         {
-            AppDomain.CurrentDomain.SetData("APP_CONFIG_FILE",
+            Console.Title = "Initializing WEaBOO";
+               AppDomain.CurrentDomain.SetData("APP_CONFIG_FILE",
                 Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), "App.config"));
             ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
 
