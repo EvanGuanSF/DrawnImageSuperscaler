@@ -7,6 +7,7 @@ using System.Drawing;
 using System.Threading.Tasks;
 using System.Configuration;
 using Microsoft.WindowsAPICodePack.Taskbar;
+using System.Linq;
 
 namespace WaifuEmbiggeningAndBatchOptimizationOperations
 {
@@ -43,7 +44,12 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
         public static void UpYourWaifu(string directory)
         {
             TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.Normal);
+
             string currentDirectory = Directory.GetCurrentDirectory();
+            if (Directory.Exists(ConfigurationManager.AppSettings["SourceFolderName"]))
+            {
+                currentDirectory = ConfigurationManager.AppSettings["SourceFolderName"];
+            }
             string sourceFolderPath = Path.Combine(currentDirectory, ConfigurationManager.AppSettings["SourceFolderName"]);
             string temporaryFolderPath = Path.Combine(currentDirectory, ConfigurationManager.AppSettings["TempFolderName"]);
             string destinationFolderPath = Path.Combine(currentDirectory, ConfigurationManager.AppSettings["DestinationFolderName"]);
@@ -146,7 +152,7 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
                 // Now enqueue an optimization task.
                 Pinger.EnqueueImageForOptimization(anJob.Result);
 
-                Console.Title = GetScalerCompletionPercentage() + " % " +
+                Console.Title = GetScalerCompletionPercentage() + "% " +
                             "(" + numScaledImages + "/" + numProcessableImages + ") Images Scaled";
             }
             if (numScaledImages == numProcessableImages)
@@ -298,6 +304,10 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
         private static async Task<string> Waifu2xJobController(ImageOperationInfo image)
         {
             string currentDirectory = Directory.GetCurrentDirectory();
+            if (Directory.Exists(ConfigurationManager.AppSettings["SourceFolderName"]))
+            {
+                currentDirectory = ConfigurationManager.AppSettings["SourceFolderName"];
+            }
             string sourceFolderPath = Path.Combine(currentDirectory, ConfigurationManager.AppSettings["SourceFolderName"]);
             string temporaryFolderPath = Path.Combine(currentDirectory, ConfigurationManager.AppSettings["TempFolderName"]);
             string destinationFolderPath = Path.Combine(currentDirectory, ConfigurationManager.AppSettings["DestinationFolderName"]);
@@ -357,11 +367,9 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
         private static string DoUpTheWaifusDirect(string inputFile, string outputPath,
             int magnificationSize = 2, int batch = 6, int split = 128)
         {
+            outputPath = Path.Combine(Path.GetDirectoryName(outputPath), Path.GetFileNameWithoutExtension(outputPath) + ".png");
             string modelDir = Path.Combine(ConfigurationManager.AppSettings["Waifu2xCaffeDirectory"],
                     ConfigurationManager.AppSettings["ModelDirectory"]);
-            outputPath = Path.Combine(Path.GetDirectoryName(outputPath), Path.GetFileNameWithoutExtension(outputPath) + ".png");
-
-            string workingDirectory = Directory.GetCurrentDirectory();
             string waifuExec = Path.Combine(ConfigurationManager.AppSettings["Waifu2xCaffeDirectory"],
                 ConfigurationManager.AppSettings["Waifu2xExecutableName"]);
 
@@ -509,7 +517,14 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
         private static void CleanupFolders()
         {
             // Cleanup folders.
-            string tempImageFolder = Path.Combine(Directory.GetCurrentDirectory(), ConfigurationManager.AppSettings["TempFolderName"]);
+            string currentDirectory = Directory.GetCurrentDirectory();
+            if (Directory.Exists(ConfigurationManager.AppSettings["SourceFolderName"]))
+            {
+                currentDirectory = ConfigurationManager.AppSettings["SourceFolderName"];
+            }
+
+            string tempImageFolder = Path.Combine(currentDirectory, ConfigurationManager.AppSettings["TempFolderName"]);
+
             try
             {
                 Directory.Delete(tempImageFolder, true);
@@ -517,6 +532,47 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
             catch (Exception e)
             {
                 ExceptionOutput.GetExceptionMessages(e);
+            }
+            // Delete error logs
+            bool deleteLogs = false;
+            bool.TryParse(ConfigurationManager.AppSettings["DeleteErrorLogs"], out deleteLogs);
+            if(deleteLogs)
+            {
+                List<string> errorLogPathsList = new List<string>(); ;
+                if (!Directory.Exists(Environment.CurrentDirectory))
+                {
+                    return;
+                }
+
+                var collectionOfFiles = Directory.EnumerateFiles(Environment.CurrentDirectory, "*.*", SearchOption.TopDirectoryOnly)
+                .Where(s => s.StartsWith("error_log_"));
+                
+                int count = collectionOfFiles.Count();
+                string[] arrayOfFiles;
+
+                if (count > 0)
+                {
+                    arrayOfFiles = new string[count - 1];
+                    arrayOfFiles = collectionOfFiles.ToArray();
+                }
+                else
+                {
+                    arrayOfFiles = new string[0];
+                }
+
+                errorLogPathsList = arrayOfFiles.ToList();
+
+                foreach(string errorLog in errorLogPathsList)
+                {
+                    try
+                    {
+                        File.Delete(errorLog);
+                    }
+                    catch (Exception e)
+                    {
+                        ExceptionOutput.GetExceptionMessages(e);
+                    }
+                }
             }
         }
 
