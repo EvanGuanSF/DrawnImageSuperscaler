@@ -30,7 +30,7 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
                 this.opType = passedOpType;
             }
         }
-        
+
         private static int numScaledImages = 0;
         private static int numProcessableImages = 0;
 
@@ -45,7 +45,7 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
             string sourceFolderPath = Path.Combine(currentDirectory, ConfigurationManager.AppSettings["SourceFolderName"]);
             string temporaryFolderPath = Path.Combine(currentDirectory, ConfigurationManager.AppSettings["TempFolderName"]);
             string destinationFolderPath = Path.Combine(currentDirectory, ConfigurationManager.AppSettings["DestinationFolderName"]);
-            
+
             CancellationTokenSource pingerCancelToken = new CancellationTokenSource();
 
             // Make the temp folder and output folder if necessary.
