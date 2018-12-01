@@ -87,12 +87,11 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
                 {
                     Thread.Sleep(250);
                 }
-                TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.Error);
+                TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.Indeterminate);
                 userRequestCancelRemainingOperations = true;
             });
 
             // Waifu2x - Caffee conversion loop.
-            TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.Normal);
             Console.Title = GetScalerCompletionPercentage() + "% " +
                 "(" + numScaledImages + "/" + numProcessableImages + ") Images Scaled";
             int dotIncrementer = 0;
@@ -172,6 +171,7 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
             // *********
             // Initiate, display status of, and check for cancellation of image optimization.
             dotIncrementer = 0;
+
             while (!userRequestCancelRemainingOperations && !optimizationBackgroundTask.IsCompleted)
             {
                 // Scaling is done at this point, so we are only waiting
@@ -201,7 +201,9 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
             {
                 dotIncrementer = 0;
                 pingerCancelToken.Cancel();
-                while (!optimizationBackgroundTask.IsCompleted && (Pinger.GetPingerImageQueueCount() > 0))
+                TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.Indeterminate);
+                TaskbarManager.Instance.SetProgressValue(GetOptmizedImagesCount(), numProcessableImages);
+                while (!optimizationBackgroundTask.IsCompleted && (Pinger.GetRunningThreadCount() > 0))
                 {
                     Console.Write("\rFinishing active optimizations" + new string('.', (dotIncrementer % 10) + 1) +
                         new string(' ', 55) + new string('\b', 56));
@@ -209,6 +211,7 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
                     Thread.Sleep(100);
                 }
                 TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.Error);
+                TaskbarManager.Instance.SetProgressValue(GetOptmizedImagesCount(), numProcessableImages);
                 Console.Write("\rOptimizer pass cancelled." + new string(' ', 55) + new string('\b', 56));
                 Console.WriteLine();
                 Console.Title = GetOptimizationCompletionPercentage() + "% " +
