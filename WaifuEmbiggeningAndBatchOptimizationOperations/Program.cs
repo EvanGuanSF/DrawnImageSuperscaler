@@ -46,7 +46,6 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
             DateTime startTime = DateTime.Now;
 
             Console.WriteLine("WEaBOO started at".PadRight(45) + ": " + DateTime.Now.ToString("hh:mm:ss tt"));
-            Console.WriteLine();
 
             // Start a timer.
             var watch = Stopwatch.StartNew();

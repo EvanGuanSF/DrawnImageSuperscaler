@@ -44,11 +44,11 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
         public static void UpYourWaifu(string directory)
         {
             TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.Normal);
-
+            
             string currentDirectory = Directory.GetCurrentDirectory();
-            if (Directory.Exists(ConfigurationManager.AppSettings["SourceFolderName"]))
+            if (Directory.Exists(ConfigurationManager.AppSettings["BaseFolderPath"].ToString()))
             {
-                currentDirectory = ConfigurationManager.AppSettings["SourceFolderName"];
+                currentDirectory = ConfigurationManager.AppSettings["BaseFolderPath"];
             }
             string sourceFolderPath = Path.Combine(currentDirectory, ConfigurationManager.AppSettings["SourceFolderName"]);
             string temporaryFolderPath = Path.Combine(currentDirectory, ConfigurationManager.AppSettings["TempFolderName"]);
@@ -59,6 +59,10 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
             // Make the temp folder and output folder if necessary.
             MakeDirectory(temporaryFolderPath);
             MakeDirectory(destinationFolderPath);
+
+            // Print working folder details.
+            Console.WriteLine("Source folder path: " + sourceFolderPath);
+            Console.WriteLine();
 
             // Get the images in the S&R folder and put their paths in a list
             // in natural order (Windows sort by name ascending).
@@ -225,9 +229,10 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
             }
             else
             {
+                TaskbarManager.Instance.SetProgressValue(GetOptmizedImagesCount(), numProcessableImages);
                 Console.Write("\rOptimizer pass completed".PadRight(46) + ": " +
                     GetOptimizationCompletionPercentage() + "% " +
-                    "(" + (numProcessableImages - GetOptmizedImagesCount()) + "/" + numProcessableImages + ") Images Optimized" +
+                    "(" + GetOptmizedImagesCount() + "/" + numProcessableImages + ") Images Optimized" +
                     new string(' ', 55) + new string('\b', 56));
                 Console.WriteLine();
                 Console.Title = GetOptimizationCompletionPercentage() + "% " +
@@ -304,11 +309,10 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
         private static async Task<string> Waifu2xJobController(ImageOperationInfo image)
         {
             string currentDirectory = Directory.GetCurrentDirectory();
-            if (Directory.Exists(ConfigurationManager.AppSettings["SourceFolderName"]))
+            if (Directory.Exists(ConfigurationManager.AppSettings["BaseFolderPath"]))
             {
-                currentDirectory = ConfigurationManager.AppSettings["SourceFolderName"];
+                currentDirectory = ConfigurationManager.AppSettings["BaseFolderPath"];
             }
-            string sourceFolderPath = Path.Combine(currentDirectory, ConfigurationManager.AppSettings["SourceFolderName"]);
             string temporaryFolderPath = Path.Combine(currentDirectory, ConfigurationManager.AppSettings["TempFolderName"]);
             string destinationFolderPath = Path.Combine(currentDirectory, ConfigurationManager.AppSettings["DestinationFolderName"]);
             string tempImagePath = null;
@@ -518,9 +522,9 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
         {
             // Cleanup folders.
             string currentDirectory = Directory.GetCurrentDirectory();
-            if (Directory.Exists(ConfigurationManager.AppSettings["SourceFolderName"]))
+            if (Directory.Exists(ConfigurationManager.AppSettings["BaseFolderPath"]))
             {
-                currentDirectory = ConfigurationManager.AppSettings["SourceFolderName"];
+                currentDirectory = ConfigurationManager.AppSettings["BaseFolderPath"];
             }
 
             string tempImageFolder = Path.Combine(currentDirectory, ConfigurationManager.AppSettings["TempFolderName"]);
@@ -539,12 +543,12 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
             if(deleteLogs)
             {
                 List<string> errorLogPathsList = new List<string>(); ;
-                if (!Directory.Exists(Environment.CurrentDirectory))
+                if (!Directory.Exists(currentDirectory))
                 {
                     return;
                 }
 
-                var collectionOfFiles = Directory.EnumerateFiles(Environment.CurrentDirectory, "*.*", SearchOption.TopDirectoryOnly)
+                var collectionOfFiles = Directory.EnumerateFiles(currentDirectory, "*.*", SearchOption.TopDirectoryOnly)
                 .Where(s => s.StartsWith("error_log_"));
                 
                 int count = collectionOfFiles.Count();

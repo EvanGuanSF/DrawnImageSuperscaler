@@ -43,9 +43,7 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
                     }
 
                     // Give the cpu and IO some breathing room.
-                    Thread.Sleep(1000);
-                    GC.Collect();
-                    Thread.Sleep(1000);
+                    Thread.Sleep(25);
                 });
         }
 
