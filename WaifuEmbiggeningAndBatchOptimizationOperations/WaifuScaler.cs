@@ -143,7 +143,7 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
                 // Now enqueue an optimization task.
                 Pinger.EnqueueImageForOptimization(processedImagePath);
 
-                Console.Title = (int)(numScaledImages / numProcessableImages) + " % " +
+                Console.Title = GetScalerCompletionPercentage() + " % " +
                             "(" + numScaledImages + "/" + numProcessableImages + ") Images Scaled";
             }
             if (numScaledImages == numProcessableImages)
