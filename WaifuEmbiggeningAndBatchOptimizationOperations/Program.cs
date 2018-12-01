@@ -61,7 +61,7 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
         }
 
         /// <summary>
-        /// Converts number of bytes into human readable format.
+        /// Converts number of bytes to human readable format.
         /// </summary>
         /// <param name="bytes"></param>
         /// <returns>string with suffix of highest order byte class</returns>

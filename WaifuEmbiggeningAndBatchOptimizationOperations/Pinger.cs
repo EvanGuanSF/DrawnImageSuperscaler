@@ -136,7 +136,7 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
         /// Helper funciton for returning the number of unprocessed images remaining in the BlockingCollection.
         /// </summary>
         /// <returns>Number of unprocessed images.</returns>
-        public static int GetConcurrentImageQueueCount()
+        public static int GetPingerImageQueueCount()
         {
             return concurrentImageCollection.Count;
         }
