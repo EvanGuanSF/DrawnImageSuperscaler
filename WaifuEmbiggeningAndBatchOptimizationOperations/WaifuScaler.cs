@@ -43,14 +43,14 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
         {
             string currentDirectory = Directory.GetCurrentDirectory();
             string sourceFolderPath = Path.Combine(currentDirectory, ConfigurationManager.AppSettings["SourceFolderName"]);
-            string temporaryFolderPath = Path.Combine(currentDirectory, ConfigurationManager.AppSettings["TempFolderName"].ToString());
-            string destinationFolderPath = Path.Combine(currentDirectory, ConfigurationManager.AppSettings["DestinationFolderName"].ToString());
-            string processedImagePath = null;
+            string temporaryFolderPath = Path.Combine(currentDirectory, ConfigurationManager.AppSettings["TempFolderName"]);
+            string destinationFolderPath = Path.Combine(currentDirectory, ConfigurationManager.AppSettings["DestinationFolderName"]);
             
             CancellationTokenSource pingerCancelToken = new CancellationTokenSource();
 
-            // Make the temp folder.
+            // Make the temp folder and output folder if necessary.
             MakeDirectory(temporaryFolderPath);
+            MakeDirectory(destinationFolderPath);
 
             // Get the images in the S&R folder and put their paths in a list
             // in natural order (Windows sort by name ascending).
@@ -99,7 +99,7 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
                     break;
                 }
 
-                Task anJob = Task.Run(() => Waifu2xJobController(image));
+                Task<string> anJob = Task.Run(() => Waifu2xJobController(image));
                 string currentImageName = Path.GetFileName(image.ImagePath);
 
                 while (!anJob.IsCompleted)
@@ -132,16 +132,14 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
                 numScaledImages++;
                 try
                 {
-                    File.Delete(Path.Combine(temporaryFolderPath, Path.GetFileName(image.ImagePath)));
+                    File.Delete(Path.Combine(temporaryFolderPath, Path.GetFileName(anJob.Result)));
                 }
                 catch (Exception e)
                 {
                     ExceptionOutput.GetExceptionMessages(e);
                 }
-
-                processedImagePath = Path.Combine(destinationFolderPath, Path.GetFileName(image.ImagePath));
                 // Now enqueue an optimization task.
-                Pinger.EnqueueImageForOptimization(processedImagePath);
+                Pinger.EnqueueImageForOptimization(anJob.Result);
 
                 Console.Title = GetScalerCompletionPercentage() + " % " +
                             "(" + numScaledImages + "/" + numProcessableImages + ") Images Scaled";
@@ -212,9 +210,9 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
             }
             else
             {
-                Console.Write("\rOptimizer pass completed".PadRight(46) +
+                Console.Write("\rOptimizer pass completed".PadRight(46) + ": " +
                     GetOptimizationCompletionPercentage() + "% " +
-                    ": (" + (numProcessableImages - GetOptmizedImagesCount()) + "/" + numProcessableImages + ") Images Optimized" +
+                    "(" + (numProcessableImages - GetOptmizedImagesCount()) + "/" + numProcessableImages + ") Images Optimized" +
                     new string(' ', 55) + new string('\b', 56));
                 Console.WriteLine();
                 Console.Title = GetOptimizationCompletionPercentage() + "% " +
@@ -222,25 +220,6 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
             }
             optimizationsCompleted = true;
             CleanupFolders();
-        }
-
-        private static string GetScalerCompletionPercentage()
-        {
-            if (numProcessableImages == 0)
-                return "0.0";
-            return ((double)numScaledImages / numProcessableImages * 100).ToString("0.0"); ;
-        }
-
-        private static int GetOptmizedImagesCount()
-        {
-            return numProcessableImages - Pinger.GetPingerImageQueueCount() - Pinger.GetRunningThreadCount();
-        }
-
-        private static string GetOptimizationCompletionPercentage()
-        {
-            if (numProcessableImages == 0)
-                return "0.0";
-            return ((double)GetOptmizedImagesCount() / numProcessableImages * 100).ToString("0.0"); ;
         }
 
         /// <summary>
@@ -306,13 +285,14 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
         /// Takes a single image and converts it according to hard-coded rules.
         /// </summary>
         /// <param name="image"></param>
-        private static void Waifu2xJobController(ImageOperationInfo image)
+        /// <returns>Path of the scaled image.</returns>
+        private static async Task<string> Waifu2xJobController(ImageOperationInfo image)
         {
             string currentDirectory = Directory.GetCurrentDirectory();
             string sourceFolderPath = Path.Combine(currentDirectory, ConfigurationManager.AppSettings["SourceFolderName"]);
-            string temporaryFolderPath = Path.Combine(currentDirectory, ConfigurationManager.AppSettings["TempFolderName"].ToString());
-            string destinationFolderPath = Path.Combine(currentDirectory, ConfigurationManager.AppSettings["DestinationFolderName"].ToString());
-            string latterStageImage = null;
+            string temporaryFolderPath = Path.Combine(currentDirectory, ConfigurationManager.AppSettings["TempFolderName"]);
+            string destinationFolderPath = Path.Combine(currentDirectory, ConfigurationManager.AppSettings["DestinationFolderName"]);
+            string tempImagePath = null;
             string fileName = Path.GetFileName(image.ImagePath);
 
             // Sequential scale and quality operations depending on flag.
@@ -321,83 +301,38 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
                 case ImageResolutionClassification.VeryLarge:
                     {
                         // VeryLarge case. Quality pass before doing a 2x scale with reduced batch size.
-                        DoUpTheWaifusDirect(image.ImagePath, Path.Combine(temporaryFolderPath, fileName), 1, 2, 256);
-                        latterStageImage = Path.Combine(temporaryFolderPath, fileName);
-                        DoUpTheWaifusDirect(latterStageImage, Path.Combine(destinationFolderPath, fileName), 2, 2, 256);
-                        break;
+                        tempImagePath = DoUpTheWaifusDirect(image.ImagePath, Path.Combine(temporaryFolderPath, fileName), 1, 2, 256);
+                        return DoUpTheWaifusDirect(tempImagePath, Path.Combine(destinationFolderPath, Path.GetFileName(tempImagePath)), 2, 2, 256);
                     }
                 case ImageResolutionClassification.Large:
                     {
                         // Large case. Quality pass before doing a 2x scale.
-                        DoUpTheWaifusDirect(image.ImagePath, Path.Combine(temporaryFolderPath, fileName), 1, 4, 256);
-                        latterStageImage = Path.Combine(temporaryFolderPath, fileName);
-                        DoUpTheWaifusDirect(latterStageImage, Path.Combine(destinationFolderPath, fileName), 2, 4, 256);
-                        break;
+                        tempImagePath = DoUpTheWaifusDirect(image.ImagePath, Path.Combine(temporaryFolderPath, fileName), 1, 4, 256);
+                        return DoUpTheWaifusDirect(tempImagePath, Path.Combine(destinationFolderPath, Path.GetFileName(tempImagePath)), 2, 4, 256);
                     }
                 case ImageResolutionClassification.Normal:
                     {
                         // Normal case. 2x scale before doing a quality pass.
-                        DoUpTheWaifusDirect(image.ImagePath, Path.Combine(temporaryFolderPath, fileName), 2, 4, 256);
-                        latterStageImage = Path.Combine(temporaryFolderPath, fileName);
-                        DoUpTheWaifusDirect(latterStageImage, Path.Combine(destinationFolderPath, fileName), 1, 4, 256);
-                        break;
+                        tempImagePath = DoUpTheWaifusDirect(image.ImagePath, Path.Combine(temporaryFolderPath, fileName), 2, 4, 256);
+                        return DoUpTheWaifusDirect(tempImagePath, Path.Combine(destinationFolderPath, Path.GetFileName(tempImagePath)), 1, 4, 256);
                     }
                 case ImageResolutionClassification.Small:
                     {
                         // Small case. Quality pass before doing a 2x scale with modified .
-                        DoUpTheWaifusDirect(image.ImagePath, Path.Combine(temporaryFolderPath, fileName), 1, 6, 128);
-                        latterStageImage = Path.Combine(temporaryFolderPath, fileName);
-                        DoUpTheWaifusDirect(latterStageImage, Path.Combine(destinationFolderPath, fileName), 2, 6, 128);
-                        break;
+                        tempImagePath = DoUpTheWaifusDirect(image.ImagePath, Path.Combine(temporaryFolderPath, fileName), 2, 4, 128);
+                        return DoUpTheWaifusDirect(tempImagePath, Path.Combine(destinationFolderPath, Path.GetFileName(tempImagePath)), 1, 4, 128);
                     }
                 case ImageResolutionClassification.VerySmall:
                     {
                         // Image is WAY too small and may use silly amounts of vram to process. Just return.
-                        break;
+                        return fileName;
                     }
                 default:
                     {
                         break;
                     }
             }
-        }
-
-        /// <summary>
-        /// Helper function to safely create a directory.
-        /// </summary>
-        /// <param name="directory"></param>
-        private static void MakeDirectory(string directory)
-        {
-            // Check for and make proper directories.
-            if (!Directory.Exists(directory))
-            {
-                // No input directory. Make it for future use, then return.
-                try
-                {
-                    Directory.CreateDirectory(directory);
-                }
-                catch (Exception e)
-                {
-                    ExceptionOutput.GetExceptionMessages(e);
-                }
-            }
-        }
-
-        /// <summary>
-        /// This funciton cleans up processing folders.
-        /// </summary>
-        private static void CleanupFolders()
-        {
-            // Cleanup folders.
-            string stageOneOutputPath = Path.Combine(Directory.GetCurrentDirectory(), ConfigurationManager.AppSettings["TempFolderName"]);
-            try
-            {
-                Directory.Delete(stageOneOutputPath, true);
-            }
-            catch (Exception e)
-            {
-                ExceptionOutput.GetExceptionMessages(e);
-            }
+            return null;
         }
 
         /// <summary>
@@ -409,17 +344,17 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
         /// <param name="magnificationSize"></param>
         /// <param name="batch"></param>
         /// <param name="split"></param>
-        /// <returns>Exit code of Waifu2x - Caffe</returns>
-        private static int DoUpTheWaifusDirect(string inputFile, string outputPath,
+        /// <returns>Path of the scaled output image.</returns>
+        private static string DoUpTheWaifusDirect(string inputFile, string outputPath,
             int magnificationSize = 2, int batch = 6, int split = 128)
         {
             string modelDir = Path.Combine(ConfigurationManager.AppSettings["Waifu2xCaffeDirectory"],
                     ConfigurationManager.AppSettings["ModelDirectory"]);
-            outputPath = Path.Combine(Path.GetDirectoryName(outputPath), Path.GetFileName(outputPath) + ".png");
+            outputPath = Path.Combine(Path.GetDirectoryName(outputPath), Path.GetFileNameWithoutExtension(outputPath) + ".png");
 
             string workingDirectory = Directory.GetCurrentDirectory();
             string waifuExec = Path.Combine(ConfigurationManager.AppSettings["Waifu2xCaffeDirectory"],
-                Path.Combine(ConfigurationManager.AppSettings["Waifu2xExecutableName"]));
+                ConfigurationManager.AppSettings["Waifu2xExecutableName"]);
 
             if (!File.Exists(waifuExec))
             {
@@ -432,7 +367,7 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
             {
                 // Empty directory. Just return.
                 Console.WriteLine("\nERROR - No such file".PadRight(46) + ": " + inputFile);
-                return -1;
+                return null;
             }
 
             // Adaptive scaling. If an attemp fails, try lowering the batch; if that still doesn't work, divide the split size by 2.
@@ -502,7 +437,80 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
             Thread.Sleep(250);
             GC.Collect();
 
-            return exitCode;
+            return outputPath;
         }
+
+
+        #region Helper Functions
+        /// <summary>
+        /// Returns percentage to one decimal place of total images scaled as a string.
+        /// </summary>
+        /// <returns>Percentage to one decimal place of total images scaled as a string.</returns>
+        private static string GetScalerCompletionPercentage()
+        {
+            if (numProcessableImages == 0)
+                return "0.0";
+            return ((double)numScaledImages / numProcessableImages * 100).ToString("0.0"); ;
+        }
+
+        /// <summary>
+        /// Returns the number
+        /// </summary>
+        /// <returns></returns>
+        private static int GetOptmizedImagesCount()
+        {
+            return numProcessableImages - Pinger.GetPingerImageQueueCount() - Pinger.GetRunningThreadCount();
+        }
+
+        /// <summary>
+        /// Returns percentage to one decimal place of total images optimized as a string.
+        /// </summary>
+        /// <returns>Percentage to one decimal place of total images optimized as a string.</returns>
+        private static string GetOptimizationCompletionPercentage()
+        {
+            if (numProcessableImages == 0)
+                return "0.0";
+            return ((double)GetOptmizedImagesCount() / numProcessableImages * 100).ToString("0.0"); ;
+        }
+
+        /// <summary>
+        /// Helper function to safely create a directory.
+        /// </summary>
+        /// <param name="directory"></param>
+        private static void MakeDirectory(string directory)
+        {
+            // Check for and make proper directories.
+            if (!Directory.Exists(directory))
+            {
+                // No input directory. Make it for future use, then return.
+                try
+                {
+                    Directory.CreateDirectory(directory);
+                }
+                catch (Exception e)
+                {
+                    ExceptionOutput.GetExceptionMessages(e);
+                }
+            }
+        }
+
+        /// <summary>
+        /// This funciton cleans up processing folders.
+        /// </summary>
+        private static void CleanupFolders()
+        {
+            // Cleanup folders.
+            string tempImageFolder = Path.Combine(Directory.GetCurrentDirectory(), ConfigurationManager.AppSettings["TempFolderName"]);
+            try
+            {
+                Directory.Delete(tempImageFolder, true);
+            }
+            catch (Exception e)
+            {
+                ExceptionOutput.GetExceptionMessages(e);
+            }
+        }
+
+        #endregion
     }
 }
