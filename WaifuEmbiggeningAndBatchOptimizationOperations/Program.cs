@@ -5,6 +5,7 @@ using System.IO;
 using System.Text;
 using System.Configuration;
 using System.Reflection;
+using Microsoft.WindowsAPICodePack.Taskbar;
 
 namespace WaifuEmbiggeningAndBatchOptimizationOperations
 {
@@ -16,6 +17,7 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
                AppDomain.CurrentDomain.SetData("APP_CONFIG_FILE",
                 Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), "App.config"));
             ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+            TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.NoProgress);
 
             /*
             Console.WriteLine(Path.GetFullPath(Assembly.GetEntryAssembly().Location));

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Threading.Tasks;
 using System.Configuration;
+using Microsoft.WindowsAPICodePack.Taskbar;
 
 namespace WaifuEmbiggeningAndBatchOptimizationOperations
 {
@@ -41,6 +42,7 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
         /// <param name="directory"></param>
         public static void UpYourWaifu(string directory)
         {
+            TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.Normal);
             string currentDirectory = Directory.GetCurrentDirectory();
             string sourceFolderPath = Path.Combine(currentDirectory, ConfigurationManager.AppSettings["SourceFolderName"]);
             string temporaryFolderPath = Path.Combine(currentDirectory, ConfigurationManager.AppSettings["TempFolderName"]);
@@ -85,13 +87,16 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
                 {
                     Thread.Sleep(250);
                 }
+                TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.Error);
                 userRequestCancelRemainingOperations = true;
             });
 
             // Waifu2x - Caffee conversion loop.
+            TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.Normal);
             Console.Title = GetScalerCompletionPercentage() + "% " +
                 "(" + numScaledImages + "/" + numProcessableImages + ") Images Scaled";
             int dotIncrementer = 0;
+            TaskbarManager.Instance.SetProgressValue(numScaledImages, numProcessableImages);
             foreach (ImageOperationInfo image in imageOpList)
             {
                 if (userRequestCancelRemainingOperations)
@@ -130,6 +135,7 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
                 anJob.Wait();
 
                 numScaledImages++;
+                TaskbarManager.Instance.SetProgressValue(numScaledImages, numProcessableImages);
                 try
                 {
                     File.Delete(Path.Combine(temporaryFolderPath, Path.GetFileName(anJob.Result)));
@@ -186,8 +192,11 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
                 dotIncrementer++;
                 Console.Title = GetOptimizationCompletionPercentage() + "% " +
                     "(" + GetOptmizedImagesCount() + "/" + numProcessableImages + ") Images Optimized";
+                TaskbarManager.Instance.SetProgressValue(GetOptmizedImagesCount(), numProcessableImages);
                 Thread.Sleep(100);
             }
+
+            // If the user cancels, send a cancel token and wait for the remaining operations to finish.
             if (userRequestCancelRemainingOperations && (!optimizationBackgroundTask.IsCanceled || !optimizationBackgroundTask.IsCompleted))
             {
                 dotIncrementer = 0;
@@ -199,14 +208,11 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
                     dotIncrementer++;
                     Thread.Sleep(100);
                 }
-            }
-            if (userRequestCancelRemainingOperations)
-            {
+                TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.Error);
                 Console.Write("\rOptimizer pass cancelled." + new string(' ', 55) + new string('\b', 56));
                 Console.WriteLine();
                 Console.Title = GetOptimizationCompletionPercentage() + "% " +
                     "(" + GetOptmizedImagesCount() + "/" + numProcessableImages + ") (User Cancelled)";
-                return;
             }
             else
             {
