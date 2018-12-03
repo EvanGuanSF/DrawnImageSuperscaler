@@ -39,7 +39,7 @@ namespace WaifuEnlargerAndBatchOptimizerOperations
             newList = arrayOfStuff.OrderBy(x => x, new CustomComparer<string>(NaturalComparer.CompareNatural)).ToList();
 
             // Filter out optimized or unready files.
-            newList.RemoveAll(s => !s.Contains(ConfigurationManager.AppSettings["UnprocessedImageFlagChar"]));
+            newList.RemoveAll(s => !s.Contains(ConfigurationManager.AppSettings["UnprocessedImageFlagString"]));
 
             return newList;
         }
