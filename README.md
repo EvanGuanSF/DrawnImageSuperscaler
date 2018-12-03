@@ -12,7 +12,7 @@ and then losslessly compresses the output images using ImageMagick.NET.
 __**Waifu2x - Caffee and its requirements must be acquired seperately**__
 
 Setup Instructions:
- 1. Download the latest release from https://github.com/lltcggie/waifu2x-caffe. Unzip it somewhere.
+ 1. Download the latest release from https://github.com/lltcggie/waifu2x-caffe. Unzip it somewhere. I recommend putting it somewhere close the the root of a drive, since you will need to copy the folder path later.
  2. Download the latest cuDNN library from https://developer.nvidia.com/cudnn (requires a free account). Unzip it somewhere.
  3. Open the cuDNN folder and copy cudnn64_7.dll to the waifu2x-caffe folder that contains the waifu2x-caffe.exe.
 
