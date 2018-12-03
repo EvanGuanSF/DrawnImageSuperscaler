@@ -31,7 +31,8 @@ The values in the code are optimized to work with a GTX 1070 with 8GB of vram an
 Your mileage may vary, and experimentation with batch and split sizes may be required. (Lower batch and split sizes use less vram.)**
 
 
-TODO (in no particular order):
- - Develop a self-learning process to allow the program to train itself to find optimized batch and split values for a given system.
- - Make a GUI using WPF and MVVM pattern.
+
+## TODO (in no particular order):
+ - Develop a self-learning process to allow the program to train itself to find and store optimized batch and split values for a given system.
+ - Make a GUI using WPF and MVVM design pattern.
  - Figure out how licenses work.
