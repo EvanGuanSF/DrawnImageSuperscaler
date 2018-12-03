@@ -31,7 +31,8 @@ Running Instructions:
 The values in the code are optimized to work with an Nvidia GTX 1070 with 8GB of vram and 32GB of system ram.
 Your mileage may vary, and experimentation with batch and split sizes may be required. (Lower batch and split sizes use less vram.)**
 
-## TODO (in no particular order):
+## TO DO (in no particular order):
+ - Figure out the best way to estimate and display reamaining time.
  - Develop a self-learning process to allow the program to train itself to find and store optimized batch and split values for a given system.
  - Make a GUI using WPF and MVVM design pattern.
  - Figure out how licenses work.
