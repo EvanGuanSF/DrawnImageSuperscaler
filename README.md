@@ -1,4 +1,4 @@
-# Waifu Enlarger And Batch Optimizer Operations (WEaBOO)
+# Waifu Enlarger and Batch Optimizer Operations (WEaBOO)
 Image superscaler and optimizer using Waifu2x - Caffe and ImageMagick.NET respectively.
 
 Uses the console executable from https://github.com/lltcggie/waifu2x-caffe to upscale images,
@@ -10,7 +10,7 @@ and then losslessly compresses the output images using ImageMagick.NET.
  3. Be sure to set the target to x64 only. Magick.NET may not function correctly on 32 bit systems. Images processed can easily have upwards of 30 million pixels, so there is a need for longer address spaces.
 
 ## To Run:
-__**Waifu2x - Caffee and its requirements must be acquired seperately**__
+__**Waifu2x - Caffe and its requirements must be acquired seperately**__
 
 Setup Instructions:
  1. Download the latest release from https://github.com/lltcggie/waifu2x-caffe. Unzip it somewhere. I recommend putting it somewhere close the the root of a drive, since you will need to copy the folder path later.
@@ -27,7 +27,7 @@ Running Instructions:
  4. Files are renamed and output to the working directory by default, or the config specified DestinationFolderName.
  
 
-**Waifu2x - Caffee is optimized to work with more recent Nvidia GPUs, and this program is currently hardcoded to use cuDDN (though you can change this yourself), and therefore only those GPUs by default.
+**Waifu2x - Caffe is optimized to work with more recent Nvidia GPUs, and this program is currently hardcoded to use cuDDN (though you can change this yourself), and therefore only those GPUs by default.
 The values in the code are optimized to work with an Nvidia GTX 1070 with 8GB of vram and 32GB of system ram.
 Your mileage may vary, and experimentation with batch and split sizes may be required. (Lower batch and split sizes use less vram.)**
 
