@@ -7,6 +7,7 @@ and then losslessly compresses the output images using ImageMagick.NET.
 ## To Build:
  1. Acquire the latest Magick.NET-Q16-HDRI-AnyCPU package via NuGet package manager in Visual Studio or via https://www.nuget.org/packages/Magick.NET-Q16-HDRI-AnyCPU.
  2. Acquire the latest Microsoft-WindowsAPICodePack-Core and Microsoft-WindowsAPICodePack-Shell via NuGet package manager in Visual Studio or in the links on https://github.com/contre/Windows-API-Code-Pack-1.1.
+ 3. Be sure to set the target to x64 only. Magick.NET may not function correctly on 32 bit systems. Images processed can easily have upwards of 30 million pixels, so there is a need for longer address spaces.
 
 ## To Run:
 __**Waifu2x - Caffee and its requirements must be acquired seperately**__
