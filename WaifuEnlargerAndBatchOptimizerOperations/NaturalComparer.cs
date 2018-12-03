@@ -1,7 +1,6 @@
-﻿using System;
-using System.Globalization;
+﻿using System.Globalization;
 
-namespace WaifuEmbiggeningAndBatchOptimizationOperations
+namespace WaifuEnlargerAndBatchOptimizerOperations
 {
     public class NaturalComparer
     {
@@ -19,8 +18,8 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
             int softResultWeight = 0;
             while (iA < strA.Length && iB < strB.Length)
             {
-                bool isDigitA = Char.IsDigit(strA[iA]);
-                bool isDigitB = Char.IsDigit(strB[iB]);
+                bool isDigitA = char.IsDigit(strA[iA]);
+                bool isDigitB = char.IsDigit(strB[iB]);
                 if (isDigitA != isDigitB)
                 {
                     return cmp.Compare(strA, iA, strB, iB, options);
@@ -29,8 +28,8 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
                 {
                     int jA = iA + 1;
                     int jB = iB + 1;
-                    while (jA < strA.Length && !Char.IsDigit(strA[jA])) jA++;
-                    while (jB < strB.Length && !Char.IsDigit(strB[jB])) jB++;
+                    while (jA < strA.Length && !char.IsDigit(strA[jA])) jA++;
+                    while (jB < strB.Length && !char.IsDigit(strB[jB])) jB++;
                     int cmpResult = cmp.Compare(strA, iA, jA - iA, strB, iB, jB - iB, options);
                     if (cmpResult != 0)
                     {
@@ -55,8 +54,8 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
                 }
                 else
                 {
-                    char zeroA = (char)(strA[iA] - (int)Char.GetNumericValue(strA[iA]));
-                    char zeroB = (char)(strB[iB] - (int)Char.GetNumericValue(strB[iB]));
+                    char zeroA = (char)(strA[iA] - (int)char.GetNumericValue(strA[iA]));
+                    char zeroB = (char)(strB[iB] - (int)char.GetNumericValue(strB[iB]));
                     int jA = iA;
                     int jB = iB;
                     while (jA < strA.Length && strA[jA] == zeroA) jA++;
@@ -64,10 +63,10 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
                     int resultIfSameLength = 0;
                     do
                     {
-                        isDigitA = jA < strA.Length && Char.IsDigit(strA[jA]);
-                        isDigitB = jB < strB.Length && Char.IsDigit(strB[jB]);
-                        int numA = isDigitA ? (int)Char.GetNumericValue(strA[jA]) : 0;
-                        int numB = isDigitB ? (int)Char.GetNumericValue(strB[jB]) : 0;
+                        isDigitA = jA < strA.Length && char.IsDigit(strA[jA]);
+                        isDigitB = jB < strB.Length && char.IsDigit(strB[jB]);
+                        int numA = isDigitA ? (int)char.GetNumericValue(strA[jA]) : 0;
+                        int numB = isDigitB ? (int)char.GetNumericValue(strB[jB]) : 0;
                         if (isDigitA && (char)(strA[jA] - numA) != zeroA) isDigitA = false;
                         if (isDigitB && (char)(strB[jB] - numB) != zeroB) isDigitB = false;
                         if (isDigitA && isDigitB)

@@ -9,6 +9,7 @@
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
+FodyWeavers.xml
 
 # Build results
 [Dd]ebug/

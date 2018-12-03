@@ -1,0 +1,3 @@
+Icon made by Darius Dan from www.flaticon.com
+
+Dirk Lemstra et al. for maintaining and providing Magick.net as an openly usable package on Nuget.

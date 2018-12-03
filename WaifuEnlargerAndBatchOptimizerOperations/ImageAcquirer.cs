@@ -3,16 +3,16 @@ using System.IO;
 using System.Linq;
 using System.Configuration;
 
-namespace WaifuEmbiggeningAndBatchOptimizationOperations
+namespace WaifuEnlargerAndBatchOptimizerOperations
 {
-    static class GetImages
+    static class ImageAcquirer
     {
         /// <summary>
         /// Returns a list of images with valid extensions in a directory.
         /// </summary>
         /// <param name="directory"></param>
         /// <returns>List of paths</returns>
-        public static List<string> GetAllImages(string directory)
+        public static List<string> GetImagesFromDirectory(string directory)
         {
             List<string> newList = new List<string>(); ;
             if (!Directory.Exists(directory))
@@ -22,7 +22,6 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
 
             var listOfStuff = Directory.EnumerateFiles(directory, "*.*", SearchOption.TopDirectoryOnly)
             .Where(s => s.EndsWith(".png") || s.EndsWith(".jpg") || s.EndsWith(".bmp"));
-
 
             int count = listOfStuff.Count();
             string[] arrayOfStuff;

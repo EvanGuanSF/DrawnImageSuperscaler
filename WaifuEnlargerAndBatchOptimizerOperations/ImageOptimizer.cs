@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using ImageMagick;
 using System.Threading;
@@ -7,9 +6,9 @@ using System.Threading.Tasks;
 using System.Configuration;
 using System.Collections.Concurrent;
 
-namespace WaifuEmbiggeningAndBatchOptimizationOperations
+namespace WaifuEnlargerAndBatchOptimizerOperations
 {
-    static class Pinger
+    static class ImageOptimizer
     {
         private static BlockingCollection<string> concurrentImageCollection = new BlockingCollection<string>();
         private static int workingThreads = 0;
@@ -69,14 +68,15 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
                         imageActual.Write((string)imagePath, MagickFormat.Png);
                     }
                     // Now compress.
-                    ImageOptimizer optimizer = new ImageOptimizer();
+                    ImageMagick.ImageOptimizer optimizer = new ImageMagick.ImageOptimizer();
                     optimizer.LosslessCompress((string)imagePath);
                 }
+                // Force garbage collect to free up used memory.
                 GC.Collect();
             }
             catch (Exception e)
             {
-                ExceptionOutput.GetExceptionMessages(e);
+                InnerExceptionPrinter.GetExceptionMessages(e);
             }
             Thread.Sleep(100);
         }
@@ -89,12 +89,6 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
         private static void MarkAsProcessed(string image)
         {
             string newName = null;
-            /* Alt:
-                * ✨
-                * ☆
-                * ★
-                * 
-                */
             newName = image.Replace(char.Parse(ConfigurationManager.AppSettings["UnprocessedImageFlagChar"]),
                 char.Parse(ConfigurationManager.AppSettings["ProcessedImageFlagChar"]));
 
@@ -114,7 +108,7 @@ namespace WaifuEmbiggeningAndBatchOptimizationOperations
             }
             catch (Exception e)
             {
-                ExceptionOutput.GetExceptionMessages(e);
+                InnerExceptionPrinter.GetExceptionMessages(e);
             }
         }
 

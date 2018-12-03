@@ -1,12 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace WaifuEmbiggeningAndBatchOptimizationOperations
+namespace WaifuEnlargerAndBatchOptimizerOperations
 {
-    public static class ExceptionOutput
+    public static class InnerExceptionPrinter
     {
         public static string GetExceptionMessages(this Exception e, string msgs = "")
         {
