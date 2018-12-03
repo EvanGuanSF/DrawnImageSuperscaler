@@ -1,4 +1,4 @@
-# Waifu Enlarger And Batch Optimizer Operations (WeaBOO)
+# Waifu Enlarger And Batch Optimizer Operations (WEaBOO)
 Image superscaler and optimizer using Waifu2x - Caffe and ImageMagick.NET respectively.
 
 Uses the console executable from https://github.com/lltcggie/waifu2x-caffe to upscale images,
