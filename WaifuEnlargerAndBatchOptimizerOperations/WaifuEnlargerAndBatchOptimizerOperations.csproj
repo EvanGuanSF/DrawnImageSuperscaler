@@ -117,6 +117,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Cream.ico" />
+    <Content Include="LICENSE.txt" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.6.1">
