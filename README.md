@@ -32,6 +32,7 @@ The values in the code are optimized to work with an Nvidia GTX 1070 with 8GB of
 Your mileage may vary, and experimentation with batch and split sizes may be required. (Lower batch and split sizes use less vram.)**
 
 ## TO DO (in no particular order):
+ - Add a service version to run in the background and automatically operate on a folder on a set timer and/or at a set time of day.
  - Figure out the best way to estimate and display reamaining time.
  - Develop a self-learning process to allow the program to train itself to find and store optimized batch and split values for a given system.
  - Make a GUI using WPF and MVVM design pattern.
