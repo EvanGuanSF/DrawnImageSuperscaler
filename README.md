@@ -1,8 +1,8 @@
 # Waifu Enlarger and Batch Optimizer Operations (WEaBOO)
-Image superscaler and optimizer using Waifu2x - Caffe and ImageMagick.NET respectively.
+Image superscaler and optimizer using Waifu2x - Caffe and Magick.NET respectively.
 
 Uses the console executable from https://github.com/lltcggie/waifu2x-caffe to upscale images,
-and then losslessly compresses the output images using ImageMagick.NET.
+and then losslessly compresses the output images using Magick.NET.
 
 ## To Build:
  1. Acquire the latest Magick.NET-Q16-HDRI-AnyCPU package via NuGet package manager in Visual Studio or via https://www.nuget.org/packages/Magick.NET-Q16-HDRI-AnyCPU.
