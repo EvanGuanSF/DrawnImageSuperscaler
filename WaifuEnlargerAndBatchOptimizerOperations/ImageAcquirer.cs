@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using System.Configuration;
+using System;
 
 namespace WaifuEnlargerAndBatchOptimizerOperations
 {
@@ -40,7 +41,7 @@ namespace WaifuEnlargerAndBatchOptimizerOperations
 
             // Filter out optimized or unready files.
             newList.RemoveAll(s => !s.Contains(ConfigurationManager.AppSettings["UnprocessedImageFlagString"]));
-
+            
             return newList;
         }
     }

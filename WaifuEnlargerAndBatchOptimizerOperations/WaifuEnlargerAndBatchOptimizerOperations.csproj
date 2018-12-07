@@ -116,6 +116,9 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <None Include="Default.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="App.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

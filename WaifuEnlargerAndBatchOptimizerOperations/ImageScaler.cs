@@ -45,7 +45,7 @@ namespace WaifuEnlargerAndBatchOptimizerOperations
             TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.Normal);
             
             string currentDirectory = Directory.GetCurrentDirectory();
-            if (Directory.Exists(ConfigurationManager.AppSettings["BaseFolderPath"].ToString()))
+            if(Directory.Exists(ConfigurationManager.AppSettings["BaseFolderPath"].ToString()))
             {
                 currentDirectory = ConfigurationManager.AppSettings["BaseFolderPath"];
             }

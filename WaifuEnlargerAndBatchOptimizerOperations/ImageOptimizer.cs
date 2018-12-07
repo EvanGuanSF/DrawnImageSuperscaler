@@ -64,11 +64,12 @@ namespace WaifuEnlargerAndBatchOptimizerOperations
                     {
                         // Remove the file if we are going to overwrite it anyways.
                         File.Delete(Path.GetFullPath((string)imagePath));
-                        // Save picture as a bitmap with a png extension.
+                        // Save picture as a png so that we can operate on it.
                         imageActual.Write((string)imagePath, MagickFormat.Png);
                     }
                     // Now compress.
                     ImageMagick.ImageOptimizer optimizer = new ImageMagick.ImageOptimizer();
+                    optimizer.OptimalCompression = true;
                     optimizer.LosslessCompress((string)imagePath);
                 }
                 // Force garbage collect to free up used memory.

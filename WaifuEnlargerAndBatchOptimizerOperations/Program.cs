@@ -6,6 +6,7 @@ using System.Text;
 using System.Configuration;
 using System.Reflection;
 using Microsoft.WindowsAPICodePack.Taskbar;
+using System.Linq;
 
 namespace WaifuEnlargerAndBatchOptimizerOperations
 {
@@ -19,8 +20,10 @@ namespace WaifuEnlargerAndBatchOptimizerOperations
             // Setup console related things.
             TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.NoProgress);
             Console.Title = "Initializing WEaBOO";
-               AppDomain.CurrentDomain.SetData("APP_CONFIG_FILE",
+            AppDomain.CurrentDomain.SetData("APP_CONFIG_FILE",
                 Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), "App.config"));
+            ResetConfigMechanism();
+
             Console.SetWindowSize(150, 40);
             Console.SetWindowPosition(0, 0);
             Console.OutputEncoding = Encoding.UTF8;
@@ -43,6 +46,29 @@ namespace WaifuEnlargerAndBatchOptimizerOperations
             Console.WriteLine("Image operations completed in".PadRight(45) + ": " + ReadableTime(TimeSpan.FromMilliseconds(watch.ElapsedMilliseconds)));
             Console.WriteLine("All done.");
             Console.ReadLine();
+        }
+
+        /// <summary>
+        /// Allows usage of custom config files via resetting the
+        /// config mechanism by deleting the cached information.
+        /// </summary>
+        private static void ResetConfigMechanism()
+        {
+            typeof(ConfigurationManager)
+            .GetField("s_initState", BindingFlags.NonPublic | BindingFlags.Static)
+            .SetValue(null, 0);
+
+            typeof(ConfigurationManager)
+            .GetField("s_configSystem", BindingFlags.NonPublic | BindingFlags.Static)
+            .SetValue(null, null);
+
+            typeof(ConfigurationManager)
+            .Assembly.GetTypes()
+            .Where(x => x.FullName ==
+               "System.Configuration.ClientConfigPaths")
+            .First()
+            .GetField("s_current", BindingFlags.NonPublic | BindingFlags.Static)
+            .SetValue(null, null);
         }
 
         /// <summary>
