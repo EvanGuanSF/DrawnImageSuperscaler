@@ -17,8 +17,9 @@ namespace WaifuEnlargerAndBatchOptimizerOperations
         private enum ImageResolutionClassification : int { VerySmall, Small, Normal, Large, VeryLarge };
 
         /// <summary>
-        /// This class hold the name of the image and whether or not it
-        /// requires the special processing order.
+        /// This struct holds the name of the image and 
+        /// the enumerator code which determines the order
+        /// and type of operations to run on it, based on resolution.
         /// </summary>
         private struct ImageOperationInfo
         {
@@ -439,7 +440,7 @@ namespace WaifuEnlargerAndBatchOptimizerOperations
                             " for : " + Path.GetFileName(inputFile) +
                             new string(' ', inputFile.Length) +
                             new string('\b', inputFile.Length + 1));
-                        batch--;
+                        batch /= 2;
                     }
                     else if (split > 1)
                     {
