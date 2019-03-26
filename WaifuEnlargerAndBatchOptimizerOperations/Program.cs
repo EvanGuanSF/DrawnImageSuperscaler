@@ -43,7 +43,8 @@ namespace WaifuEnlargerAndBatchOptimizerOperations
             // Print end information.
             Console.WriteLine();
             Console.WriteLine("WEaBOO finished at".PadRight(45) + ": " + DateTime.Now.ToString("hh:mm:ss tt"));
-            Console.WriteLine("Image operations completed in".PadRight(45) + ": " + ReadableTime(TimeSpan.FromMilliseconds(watch.ElapsedMilliseconds)));
+            Console.WriteLine("Image operations completed in".PadRight(45) + ": " +
+                ReadableTime(TimeSpan.FromMilliseconds(watch.ElapsedMilliseconds)));
             Console.WriteLine("All done.");
             Console.ReadLine();
         }
@@ -90,7 +91,7 @@ namespace WaifuEnlargerAndBatchOptimizerOperations
         }
 
         /// <summary>
-        /// Converts timespan(milliseconds) into human readable format.
+        /// Converts timespan(milliseconds) to human readable format.
         /// </summary>
         /// <param name="ts"></param>
         /// <returns>string with format: hh:mm:ss:ms</returns>

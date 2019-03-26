@@ -143,6 +143,7 @@ namespace WaifuEnlargerAndBatchOptimizerOperations
                     Thread.Sleep(100);
                 }
                 anJob.Wait();
+                Debug.WriteLine("");
 
                 numScaledImages++;
                 try
@@ -324,7 +325,13 @@ namespace WaifuEnlargerAndBatchOptimizerOperations
             string temporaryFolderPath = Path.Combine(currentDirectory, ConfigurationManager.AppSettings["TempFolderName"]);
             string destinationFolderPath = Path.Combine(currentDirectory, ConfigurationManager.AppSettings["DestinationFolderName"]);
             string tempImagePath = null;
-            string fileName = Path.GetFileName(image.ImagePath);
+            string workingFolder = Path.Combine(currentDirectory, ConfigurationManager.AppSettings["SourceFolderName"]);
+            string fileName = Path.GetFullPath(image.ImagePath);
+            fileName = fileName.Replace(workingFolder, "");
+            //Debug.WriteLine("temp path: " + temporaryFolderPath);
+            //Debug.WriteLine("working folder: " + workingFolder);
+            //Debug.WriteLine("file name: " + fileName);
+            //Debug.WriteLine("dest temp path: " + temporaryFolderPath + fileName); 
 
             // Sequential scale and quality operations depending on flag.
             switch (image.resolutionClass)
@@ -332,26 +339,26 @@ namespace WaifuEnlargerAndBatchOptimizerOperations
                 case ImageResolutionClassification.VeryLarge:
                     {
                         // VeryLarge case. Quality pass before doing a 2x scale with reduced batch size.
-                        tempImagePath = Waifu2xTask(image.ImagePath, Path.Combine(temporaryFolderPath, fileName), 1, 2, 256);
-                        return Waifu2xTask(tempImagePath, Path.Combine(destinationFolderPath, Path.GetFileName(tempImagePath)), 2, 2, 256);
+                        tempImagePath = Waifu2xTask(image.ImagePath, temporaryFolderPath + fileName, 1, 2, 256);
+                        return Waifu2xTask(tempImagePath, destinationFolderPath + fileName, 2, 2, 256);
                     }
                 case ImageResolutionClassification.Large:
                     {
                         // Large case. Quality pass before doing a 2x scale.
-                        tempImagePath = Waifu2xTask(image.ImagePath, Path.Combine(temporaryFolderPath, fileName), 1, 4, 256);
-                        return Waifu2xTask(tempImagePath, Path.Combine(destinationFolderPath, Path.GetFileName(tempImagePath)), 2, 4, 256);
+                        tempImagePath = Waifu2xTask(image.ImagePath, temporaryFolderPath + fileName, 1, 4, 256);
+                        return Waifu2xTask(tempImagePath, destinationFolderPath + fileName, 2, 4, 256);
                     }
                 case ImageResolutionClassification.Normal:
                     {
                         // Normal case. 2x scale before doing a quality pass.
-                        tempImagePath = Waifu2xTask(image.ImagePath, Path.Combine(temporaryFolderPath, fileName), 2, 4, 256);
-                        return Waifu2xTask(tempImagePath, Path.Combine(destinationFolderPath, Path.GetFileName(tempImagePath)), 1, 4, 256);
+                        tempImagePath = Waifu2xTask(image.ImagePath, temporaryFolderPath + fileName, 2, 4, 256);
+                        return Waifu2xTask(tempImagePath, destinationFolderPath + fileName, 1, 4, 256);
                     }
                 case ImageResolutionClassification.Small:
                     {
                         // Small case. Quality pass before doing a 2x scale with modified .
-                        tempImagePath = Waifu2xTask(image.ImagePath, Path.Combine(temporaryFolderPath, fileName), 2, 4, 128);
-                        return Waifu2xTask(tempImagePath, Path.Combine(destinationFolderPath, Path.GetFileName(tempImagePath)), 1, 4, 128);
+                        tempImagePath = Waifu2xTask(image.ImagePath, temporaryFolderPath + fileName, 2, 4, 128);
+                        return Waifu2xTask(tempImagePath, destinationFolderPath + fileName, 1, 4, 128);
                     }
                 case ImageResolutionClassification.VerySmall:
                     {
@@ -379,15 +386,24 @@ namespace WaifuEnlargerAndBatchOptimizerOperations
         private static string Waifu2xTask(string inputFile, string outputPath,
             int magnificationSize = 2, int batch = 6, int split = 128)
         {
+            // Create the directory for the output path if it does not exist.
+            if (!Directory.Exists(Path.GetDirectoryName(outputPath)))
+                Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(outputPath)));
+
             outputPath = Path.Combine(Path.GetDirectoryName(outputPath), Path.GetFileNameWithoutExtension(outputPath) + ".png");
+            Debug.WriteLine("w2x inp: " + inputFile);
+            Debug.WriteLine("w2x out: " + outputPath);
+            
+            // Load the correct settings from the config file.
             string modelDir = Path.Combine(ConfigurationManager.AppSettings["Waifu2xCaffeDirectory"],
-                    ConfigurationManager.AppSettings["ModelDirectory"]);
+                ConfigurationManager.AppSettings["ModelDirectory"]);
             string waifuExec = Path.Combine(ConfigurationManager.AppSettings["Waifu2xCaffeDirectory"],
                 ConfigurationManager.AppSettings["Waifu2xExecutableName"]);
 
             if (!File.Exists(waifuExec))
             {
-                Console.WriteLine("No Waifu2x - Caffe executable found! Enter a key to exit.");
+                Console.WriteLine("Waifu2x - Caffe executable not found! Enter a key to exit.");
+                CleanupFolders();
                 Console.ReadKey();
                 Environment.Exit(-1);
             }
@@ -436,7 +452,7 @@ namespace WaifuEnlargerAndBatchOptimizerOperations
                     if (batch > 1)
                     {
                         // Try reducing the batch size first.
-                        Console.WriteLine("\rERROR - Could not convert. Changing batch size from " + batch + " to " + (batch - 1) +
+                        Console.WriteLine("\rERROR - Could not convert. Changing batch size from " + batch + " to " + (batch / 2) +
                             " for : " + Path.GetFileName(inputFile) +
                             new string(' ', inputFile.Length) +
                             new string('\b', inputFile.Length + 1));
@@ -454,7 +470,7 @@ namespace WaifuEnlargerAndBatchOptimizerOperations
                     else
                     {
                         // If we hit 1/1 for both batch size and split size, then we can't scale the image.
-                        Console.WriteLine("\rERROR - Could not convertZ".PadRight(46) + ": " + Path.GetFileName(inputFile));
+                        Console.WriteLine("\rERROR - Could not convert. Split/batch options exhausted.".PadRight(46) + ": " + Path.GetFileName(inputFile));
                         Console.WriteLine("Last exit code".PadRight(46) + ": " + exitCode);
                         Console.ReadLine();
                         Environment.Exit(-1);
@@ -466,6 +482,7 @@ namespace WaifuEnlargerAndBatchOptimizerOperations
             Thread.Sleep(250);
             GC.Collect();
 
+            Debug.WriteLine("w2x ret: " + outputPath);
             return outputPath;
         }
 
@@ -524,7 +541,7 @@ namespace WaifuEnlargerAndBatchOptimizerOperations
         }
 
         /// <summary>
-        /// This funciton cleans up processing folders.
+        /// Function cleans up processing files and folders.
         /// </summary>
         private static void CleanupFolders()
         {
@@ -547,7 +564,7 @@ namespace WaifuEnlargerAndBatchOptimizerOperations
             }
             // Delete error logs
             bool deleteLogs = false;
-            bool.TryParse(ConfigurationManager.AppSettings["DeleteErrorLogs"], out deleteLogs);
+            bool.TryParse(ConfigurationManager.AppSettings["DeleteErrorLogs"] ?? "false", out deleteLogs);
             if(deleteLogs)
             {
                 List<string> errorLogPathsList = new List<string>(); ;

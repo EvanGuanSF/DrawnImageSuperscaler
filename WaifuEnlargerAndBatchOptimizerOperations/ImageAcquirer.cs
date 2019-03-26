@@ -8,6 +8,7 @@ namespace WaifuEnlargerAndBatchOptimizerOperations
 {
     static class ImageAcquirer
     {
+
         /// <summary>
         /// Returns a list of images with valid extensions in a directory.
         /// </summary>
@@ -21,8 +22,21 @@ namespace WaifuEnlargerAndBatchOptimizerOperations
                 return newList;
             }
 
-            var listOfStuff = Directory.EnumerateFiles(directory, "*.*", SearchOption.TopDirectoryOnly)
-            .Where(s => s.EndsWith(".png") || s.EndsWith(".jpg") || s.EndsWith(".bmp"));
+            IEnumerable<string> listOfStuff;
+
+            bool recurseFolders = bool.TryParse(ConfigurationManager.AppSettings["RecurseFolders"] ?? "false", out recurseFolders);
+
+            // These are the current file types supported natively by Waifu2x-Caffe
+            if(recurseFolders)
+            {
+                listOfStuff = Directory.EnumerateFileSystemEntries(directory, "*.*", SearchOption.AllDirectories)
+                .Where(s => s.EndsWith(".bmp") || s.EndsWith(".png") || s.EndsWith(".jpg") || s.EndsWith(".jpeg") || s.EndsWith(".tif") || s.EndsWith(".tiff"));
+            }
+            else
+            {
+                listOfStuff = Directory.EnumerateFileSystemEntries(directory, "*.*", SearchOption.TopDirectoryOnly)
+                .Where(s => s.EndsWith(".bmp") || s.EndsWith(".png") || s.EndsWith(".jpg") || s.EndsWith(".jpeg") || s.EndsWith(".tif") || s.EndsWith(".tiff"));
+            }
 
             int count = listOfStuff.Count();
             string[] arrayOfStuff;
@@ -41,7 +55,7 @@ namespace WaifuEnlargerAndBatchOptimizerOperations
 
             // Filter out optimized or unready files.
             newList.RemoveAll(s => !s.Contains(ConfigurationManager.AppSettings["UnprocessedImageFlagString"]));
-            
+
             return newList;
         }
     }

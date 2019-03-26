@@ -90,11 +90,12 @@ namespace WaifuEnlargerAndBatchOptimizerOperations
         private static void MarkAsProcessed(string image)
         {
             string newName = null;
+            
             newName = image.Replace(char.Parse(ConfigurationManager.AppSettings["UnprocessedImageFlagString"]),
                 char.Parse(ConfigurationManager.AppSettings["ProcessedImageFlagString"]));
 
             // Rename the file.
-            // If a file with the new name already exists, delete then rename.
+            // If a file with the new name already exists delete the old file then rename the new one.
             try
             {
                 if (File.Exists(newName))
