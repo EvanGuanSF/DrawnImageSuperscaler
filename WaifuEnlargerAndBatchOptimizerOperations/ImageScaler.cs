@@ -264,46 +264,32 @@ namespace WaifuEnlargerAndBatchOptimizerOperations
 
             foreach (string image in imagePaths)
             {
-                try
+                int pixelCount = 0;
+                pixelCount = GetImageResolution(image);
+                if (pixelCount >= 100000000)
                 {
-                    using (Stream stream = File.OpenRead(image))
-                    {
-                        using (Image sourceImage = Image.FromStream(stream, false, false))
-                        {
-                            // Set the operation type for the image to be processed based on the
-                            // dimensions of the image.
-                            int resolution = sourceImage.Width * sourceImage.Height;
-                            if (resolution >= 100000000)
-                            {
-                                // At least 10000x10000
-                                imageOpList.Add(new ImageOperationInfo(image, ImageResolutionClassification.VeryLarge));
-                            }
-                            else if (resolution >= 22500000)
-                            {
-                                // At least 5000x4500
-                                imageOpList.Add(new ImageOperationInfo(image, ImageResolutionClassification.Large));
-                            }
-                            else if (resolution >= 786432)
-                            {
-                                // At least 1024x768
-                                imageOpList.Add(new ImageOperationInfo(image, ImageResolutionClassification.Normal));
-                            }
-                            else if (resolution >= 172800)
-                            {
-                                // At least 480x360
-                                imageOpList.Add(new ImageOperationInfo(image, ImageResolutionClassification.Small));
-                            }
-                            else
-                            {
-                                // Smaller than 480x360
-                                imageOpList.Add(new ImageOperationInfo(image, ImageResolutionClassification.VerySmall));
-                            }
-                        }
-                    }
+                    // At least 10000x10000
+                    imageOpList.Add(new ImageOperationInfo(image, ImageResolutionClassification.VeryLarge));
                 }
-                catch (Exception e)
+                else if (pixelCount >= 22500000)
                 {
-                    InnerExceptionPrinter.GetExceptionMessages(e);
+                    // At least 5000x4500
+                    imageOpList.Add(new ImageOperationInfo(image, ImageResolutionClassification.Large));
+                }
+                else if (pixelCount >= 786432)
+                {
+                    // At least 1024x768
+                    imageOpList.Add(new ImageOperationInfo(image, ImageResolutionClassification.Normal));
+                }
+                else if (pixelCount >= 172800)
+                {
+                    // At least 480x360
+                    imageOpList.Add(new ImageOperationInfo(image, ImageResolutionClassification.Small));
+                }
+                else
+                {
+                    // Smaller than 480x360
+                    imageOpList.Add(new ImageOperationInfo(image, ImageResolutionClassification.VerySmall));
                 }
             }
 
@@ -338,25 +324,25 @@ namespace WaifuEnlargerAndBatchOptimizerOperations
             {
                 case ImageResolutionClassification.VeryLarge:
                     {
-                        // VeryLarge case. Quality pass before doing a 2x scale with reduced batch size.
+                        // VeryLarge case. Quality pass before doing a 2x scale.
                         tempImagePath = Waifu2xTask(image.ImagePath, temporaryFolderPath + fileName, 1, 2, 256);
                         return Waifu2xTask(tempImagePath, destinationFolderPath + fileName, 2, 2, 256);
                     }
                 case ImageResolutionClassification.Large:
                     {
                         // Large case. Quality pass before doing a 2x scale.
-                        tempImagePath = Waifu2xTask(image.ImagePath, temporaryFolderPath + fileName, 1, 4, 256);
-                        return Waifu2xTask(tempImagePath, destinationFolderPath + fileName, 2, 4, 256);
+                        tempImagePath = Waifu2xTask(image.ImagePath, temporaryFolderPath + fileName, 1, 2, 256);
+                        return Waifu2xTask(tempImagePath, destinationFolderPath + fileName, 2, 2, 256);
                     }
                 case ImageResolutionClassification.Normal:
                     {
                         // Normal case. 2x scale before doing a quality pass.
-                        tempImagePath = Waifu2xTask(image.ImagePath, temporaryFolderPath + fileName, 2, 4, 256);
-                        return Waifu2xTask(tempImagePath, destinationFolderPath + fileName, 1, 4, 256);
+                        tempImagePath = Waifu2xTask(image.ImagePath, temporaryFolderPath + fileName, 2, 4, 128);
+                        return Waifu2xTask(tempImagePath, destinationFolderPath + fileName, 1, 4, 128);
                     }
                 case ImageResolutionClassification.Small:
                     {
-                        // Small case. Quality pass before doing a 2x scale with modified .
+                        // Small case. 2x scale before doing a quality pass.
                         tempImagePath = Waifu2xTask(image.ImagePath, temporaryFolderPath + fileName, 2, 4, 128);
                         return Waifu2xTask(tempImagePath, destinationFolderPath + fileName, 1, 4, 128);
                     }
@@ -446,25 +432,25 @@ namespace WaifuEnlargerAndBatchOptimizerOperations
 
                 exitCode = magDenoise.ExitCode;
 
-                // Check the exit code.
+                // Check the exit code. Continue looping while reducing resource requirements until success or cannot reduce resource usage further.
                 if (exitCode < 0)
                 {
                     if (batch > 1)
                     {
                         // Try reducing the batch size first.
-                        Console.WriteLine("\rERROR - Could not convert. Changing batch size from " + batch + " to " + (batch / 2) +
-                            " for : " + Path.GetFileName(inputFile) +
-                            new string(' ', inputFile.Length) +
-                            new string('\b', inputFile.Length + 1));
+                        Console.WriteLine("\r" + DateTime.Now.ToString("hh: mm:ss tt") + " ERROR - Could not convert. Changing batch size from " + batch + " to " + (batch / 2) +
+                            " for : " + Path.GetFileName(inputFile) + " resolution: " + GetImageResolution(inputFile).ToString() +
+                            new string(' ', GetImageResolution(inputFile).ToString().Length) +
+                            new string('\b', GetImageResolution(inputFile).ToString().Length + 1));
                         batch /= 2;
                     }
                     else if (split > 1)
                     {
                         // If we still can't convert, try lowering the split size.
-                        Console.WriteLine("\rERROR - Could not convert. Changing split size from " + split + " to " + (split / 2) +
-                            " for : " + Path.GetFileName(inputFile) +
-                            new string(' ', inputFile.Length) +
-                            new string('\b', inputFile.Length + 1));
+                        Console.WriteLine("\r" + DateTime.Now.ToString("hh: mm:ss tt") + " ERROR - Could not convert. Changing split size from " + split + " to " + (split / 2) +
+                            " for : " + Path.GetFileName(inputFile) + " resolution: " + GetImageResolution(inputFile).ToString() +
+                            new string(' ', GetImageResolution(inputFile).ToString().Length) +
+                            new string('\b', GetImageResolution(inputFile).ToString().Length + 1));
                         split /= 2;
                     }
                     else
@@ -605,6 +591,28 @@ namespace WaifuEnlargerAndBatchOptimizerOperations
             }
         }
 
+        private static int GetImageResolution(string image)
+        {
+            int resolution = 0;
+            try
+            {
+                using (Stream stream = File.OpenRead(image))
+                {
+                    using (Image sourceImage = Image.FromStream(stream, false, false))
+                    {
+                        // Set the operation type for the image to be processed based on the
+                        // dimensions of the image.
+                        resolution = sourceImage.Width * sourceImage.Height;
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                InnerExceptionPrinter.GetExceptionMessages(e);
+            }
+
+            return resolution;
+        }
         #endregion
     }
 }
