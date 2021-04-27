@@ -4,7 +4,7 @@ using System.Linq;
 using System.Configuration;
 using System;
 
-namespace WaifuEnlargerAndBatchOptimizerOperations
+namespace DrawnImageSuperscaler
 {
     static class ImageAcquirer
     {

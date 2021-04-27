@@ -9,7 +9,7 @@ using System.Configuration;
 using Microsoft.WindowsAPICodePack.Taskbar;
 using System.Linq;
 
-namespace WaifuEnlargerAndBatchOptimizerOperations
+namespace DrawnImageSuperscaler
 {
     public static class ImageScaler
     {

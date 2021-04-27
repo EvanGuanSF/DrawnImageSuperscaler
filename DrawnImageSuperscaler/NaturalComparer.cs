@@ -1,6 +1,6 @@
 ﻿using System.Globalization;
 
-namespace WaifuEnlargerAndBatchOptimizerOperations
+namespace DrawnImageSuperscaler
 {
     public class NaturalComparer
     {

@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace WaifuEnlargerAndBatchOptimizerOperations.Properties {
+namespace DrawnImageSuperscaler.Properties {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace WaifuEnlargerAndBatchOptimizerOperations.Properties {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("WaifuEnlargerAndBatchOptimizerOperations.Properties.Resources", typeof(Resources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("DrawnImageSuperscaler.Properties.Resources", typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;

@@ -8,7 +8,7 @@ using System.Reflection;
 using Microsoft.WindowsAPICodePack.Taskbar;
 using System.Linq;
 
-namespace WaifuEnlargerAndBatchOptimizerOperations
+namespace DrawnImageSuperscaler
 {
     class Program
     {
@@ -19,7 +19,7 @@ namespace WaifuEnlargerAndBatchOptimizerOperations
 
             // Setup console related things.
             TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.NoProgress);
-            Console.Title = "Initializing WEaBOO";
+            Console.Title = "Initializing Drawn Image Superscaler";
             AppDomain.CurrentDomain.SetData("APP_CONFIG_FILE",
                 Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), "App.config"));
             ResetConfigMechanism();
@@ -31,7 +31,7 @@ namespace WaifuEnlargerAndBatchOptimizerOperations
 
             // Print start information.
             DateTime startTime = DateTime.Now;
-            Console.WriteLine("WEaBOO started at".PadRight(45) + ": " + DateTime.Now.ToString("hh:mm:ss tt"));
+            Console.WriteLine("Drawn Image Superscaler started at".PadRight(45) + ": " + DateTime.Now.ToString("hh:mm:ss tt"));
 
             // Start a timer.
             var watch = Stopwatch.StartNew();
@@ -42,7 +42,7 @@ namespace WaifuEnlargerAndBatchOptimizerOperations
             
             // Print end information.
             Console.WriteLine();
-            Console.WriteLine("WEaBOO finished at".PadRight(45) + ": " + DateTime.Now.ToString("hh:mm:ss tt"));
+            Console.WriteLine("Drawn Image Superscaler finished at".PadRight(45) + ": " + DateTime.Now.ToString("hh:mm:ss tt"));
             Console.WriteLine("Image operations completed in".PadRight(45) + ": " +
                 ReadableTime(TimeSpan.FromMilliseconds(watch.ElapsedMilliseconds)));
             Console.WriteLine("All done.");

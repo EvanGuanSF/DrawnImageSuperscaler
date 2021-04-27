@@ -7,8 +7,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{9935D727-847D-4279-AC10-FF1B68A41C9E}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>WaifuEnlargerAndBatchOptimizerOperations</RootNamespace>
-    <AssemblyName>WEaBOO</AssemblyName>
+    <RootNamespace>DrawnImageSuperscaler</RootNamespace>
+    <AssemblyName>DrawnImageSuperscaler</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -74,7 +74,7 @@
     <ApplicationIcon>Resources\EnlargeIcon.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup>
-    <StartupObject>WaifuEnlargerAndBatchOptimizerOperations.Program</StartupObject>
+    <StartupObject>DrawnImageSuperscaler.Program</StartupObject>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Magick.NET-Q16-HDRI-AnyCPU, Version=7.11.1.0, Culture=neutral, PublicKeyToken=2004825badfa91ec, processorArchitecture=MSIL">

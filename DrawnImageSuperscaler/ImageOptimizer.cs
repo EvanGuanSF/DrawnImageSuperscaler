@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Configuration;
 using System.Collections.Concurrent;
 
-namespace WaifuEnlargerAndBatchOptimizerOperations
+namespace DrawnImageSuperscaler
 {
     static class ImageOptimizer
     {

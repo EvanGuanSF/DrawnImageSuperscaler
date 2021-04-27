@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace WaifuEnlargerAndBatchOptimizerOperations
+namespace DrawnImageSuperscaler
 {
     public static class InnerExceptionPrinter
     {
